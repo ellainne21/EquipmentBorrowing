@@ -1,0 +1,11 @@
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\bin\Debug\net10.0\EquipmentBorrowing.Domain.deps.json
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\bin\Debug\net10.0\EquipmentBorrowing.Domain.dll
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\bin\Debug\net10.0\EquipmentBorrowing.Domain.pdb
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\EquipmentBorrowing.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\EquipmentBorrowing.Domain.AssemblyInfoInputs.cache
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\EquipmentBorrowing.Domain.AssemblyInfo.cs
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\EquipmentBorrowing.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\EquipmentBorrowing.Domain.dll
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\refint\EquipmentBorrowing.Domain.dll
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\EquipmentBorrowing.Domain.pdb
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\ref\EquipmentBorrowing.Domain.dll

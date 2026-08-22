@@ -1,11 +1,49 @@
 {
   "version": 4,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "EquipmentBorrowing.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "EquipmentBorrowing.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/EquipmentBorrowing.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/EquipmentBorrowing.Application.dll": {}
+        }
+      },
+      "EquipmentBorrowing.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/EquipmentBorrowing.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/EquipmentBorrowing.Domain.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "EquipmentBorrowing.Application/1.0.0": {
+      "type": "project",
+      "path": "../EquipmentBorrowing.Application/EquipmentBorrowing.Application.csproj",
+      "msbuildProject": "../EquipmentBorrowing.Application/EquipmentBorrowing.Application.csproj"
+    },
+    "EquipmentBorrowing.Domain/1.0.0": {
+      "type": "project",
+      "path": "../EquipmentBorrowing.Domain/EquipmentBorrowing.Domain.csproj",
+      "msbuildProject": "../EquipmentBorrowing.Domain/EquipmentBorrowing.Domain.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "EquipmentBorrowing.Application >= 1.0.0",
+      "EquipmentBorrowing.Domain >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\ellai\\.nuget\\packages\\": {}
@@ -32,7 +70,14 @@
         "net10.0": {
           "framework": "net10.0",
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\ellai\\EquipmentBorrowing\\src\\EquipmentBorrowing.Application\\EquipmentBorrowing.Application.csproj": {
+              "projectPath": "C:\\Users\\ellai\\EquipmentBorrowing\\src\\EquipmentBorrowing.Application\\EquipmentBorrowing.Application.csproj"
+            },
+            "C:\\Users\\ellai\\EquipmentBorrowing\\src\\EquipmentBorrowing.Domain\\EquipmentBorrowing.Domain.csproj": {
+              "projectPath": "C:\\Users\\ellai\\EquipmentBorrowing\\src\\EquipmentBorrowing.Domain\\EquipmentBorrowing.Domain.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
