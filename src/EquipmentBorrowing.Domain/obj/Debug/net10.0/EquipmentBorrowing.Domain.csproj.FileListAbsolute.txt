@@ -9,3 +9,4 @@ C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.
 C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\refint\EquipmentBorrowing.Domain.dll
 C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\EquipmentBorrowing.Domain.pdb
 C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\ref\EquipmentBorrowing.Domain.dll
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\obj\Debug\net10.0\EquipmentBorrowing.Domain.sourcelink.json

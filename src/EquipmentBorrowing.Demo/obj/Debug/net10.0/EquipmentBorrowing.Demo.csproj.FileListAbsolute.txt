@@ -20,3 +20,4 @@ C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Demo\obj\Debug\net10.0\
 C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Demo\obj\Debug\net10.0\EquipmentBorrowing.Demo.pdb
 C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Demo\obj\Debug\net10.0\EquipmentBorrowing.Demo.genruntimeconfig.cache
 C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Demo\obj\Debug\net10.0\ref\EquipmentBorrowing.Demo.dll
+C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Demo\obj\Debug\net10.0\EquipmentBorrowing.Demo.sourcelink.json
