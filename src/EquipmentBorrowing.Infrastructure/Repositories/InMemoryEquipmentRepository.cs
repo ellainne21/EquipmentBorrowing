@@ -16,6 +16,11 @@ public class InMemoryEquipmentRepository : IEquipmentRepository
         return Task.FromResult(equipment);
     }
 
+    public Task<IEnumerable<Equipment>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult<IEnumerable<Equipment>>(_equipments);
+    }
+
     public Task UpdateAsync(Equipment equipment, CancellationToken cancellationToken = default)
     {
         // In-memory: object is already updated, nothing to do
