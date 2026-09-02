@@ -23,8 +23,9 @@ public class BorrowEquipmentService
     }
 
     public async Task<string> ExecuteAsync(
-        int studentId, 
-        int equipmentId, 
+        int studentId,
+        int equipmentId,
+        DateTime expectedReturnDate,
         CancellationToken cancellationToken = default)
     {
         // 1. Does the student exist?
@@ -53,6 +54,12 @@ public class BorrowEquipmentService
             return "Failure: Equipment is currently unavailable.";
         }
 
+        // 4.5. Is the expected return date valid?
+        if (expectedReturnDate.Date <= DateTime.Now.Date)
+        {
+            return "Failure: Expected return date must be in the future.";
+        }
+
         // 5. Has the student reached the maximum number of active borrowings?
         var activeCount = await _borrowingRepository.GetActiveBorrowingsCountByStudentIdAsync(studentId, cancellationToken);
         if (activeCount >= MaxActiveBorrowings)
@@ -65,7 +72,7 @@ public class BorrowEquipmentService
             id: new Random().Next(1000, 9999), // Simple ID generation
             studentId: studentId,
             equipmentId: equipmentId,
-            expectedReturnDate: DateTime.Now.AddDays(7)
+            expectedReturnDate: expectedReturnDate
         );
 
         // Save the borrowing

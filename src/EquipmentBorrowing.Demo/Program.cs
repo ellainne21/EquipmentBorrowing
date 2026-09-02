@@ -31,8 +31,9 @@ var borrowService = new BorrowEquipmentService(
 Console.WriteLine("[TEST 1] Alice (Allowed) borrows Laptop (Available)");
 Console.WriteLine("Expected: SUCCESS");
 var result1 = await borrowService.ExecuteAsync(
-    studentId: 1, 
-    equipmentId: 101
+    studentId: 1,
+    equipmentId: 101,
+    expectedReturnDate: DateTime.Now.AddDays(7)
 );
 Console.WriteLine($"Result: {result1}\n");
 
@@ -40,8 +41,9 @@ Console.WriteLine($"Result: {result1}\n");
 Console.WriteLine("[TEST 2] Bob (NOT Allowed) borrows Projector");
 Console.WriteLine("Expected: FAILURE - Student not allowed");
 var result2 = await borrowService.ExecuteAsync(
-    studentId: 2, 
-    equipmentId: 102
+    studentId: 2,
+    equipmentId: 102,
+    expectedReturnDate: DateTime.Now.AddDays(7)
 );
 Console.WriteLine($"Result: {result2}\n");
 
@@ -49,9 +51,10 @@ Console.WriteLine($"Result: {result2}\n");
 Console.WriteLine("[TEST 3] Alice tries to borrow Laptop again (Already borrowed)");
 Console.WriteLine("Expected: FAILURE - Equipment unavailable");
 var result3 = await borrowService.ExecuteAsync(
-    studentId: 1, 
-    equipmentId: 101
+    studentId: 1,
+    equipmentId: 101,
+    expectedReturnDate: DateTime.Now.AddDays(7)
 );
 Console.WriteLine($"Result: {result3}\n");
 
-Console.WriteLine("=== Demo Complete ===");Console.WriteLine("Hello, World!");
+Console.WriteLine("=== Demo Complete ===");
