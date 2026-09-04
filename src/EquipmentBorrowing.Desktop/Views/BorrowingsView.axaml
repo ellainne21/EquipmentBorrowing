@@ -2,50 +2,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
-             xmlns:conv="using:EquipmentBorrowing.Desktop.Converters"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:Class="EquipmentBorrowing.Desktop.Views.BorrowingsView"
              x:DataType="vm:BorrowingsViewModel">
 
-    <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
+	<Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
 
-        <TextBlock Grid.Row="0" Text="Active Borrowings"
+		<TextBlock Grid.Row="0" Text="Active Borrowings"
                    FontSize="20" FontWeight="Bold"
-                   Foreground="#1B4D3E"
+                   Foreground="#831843"
                    Margin="0,0,0,12" />
 
-        <ListBox Grid.Row="1"
+		<ListBox Grid.Row="1"
                  Background="Transparent"
                  ItemsSource="{Binding ActiveBorrowings}"
                  SelectedItem="{Binding SelectedBorrowing}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border Padding="10" Margin="0,2" Background="White"
-                            BorderBrush="#A8D5C0" BorderThickness="1" CornerRadius="6">
-                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
-                            <TextBlock Grid.Column="0" Text="{Binding Id}" FontWeight="Bold" Width="50" Foreground="#1B4D3E" />
-                            <TextBlock Grid.Column="1" Text="{Binding StudentId, StringFormat='Student #{0}'}" />
-                            <TextBlock Grid.Column="2" Text="{Binding EquipmentId, StringFormat='Equipment #{0}'}" />
-                            <TextBlock Grid.Column="3" Text="{Binding ExpectedReturnDate, StringFormat='Due {0:MM/dd/yyyy}'}" />
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<Border Padding="10" Margin="0,2" Background="White"
+                            BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="6">
+						<Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+							<TextBlock Grid.Column="0" Text="{Binding Id}" FontWeight="Bold" Width="50" Foreground="#831843" />
+							<TextBlock Grid.Column="1" Text="{Binding StudentId, StringFormat='Student #{0}'}" />
+							<TextBlock Grid.Column="2" Text="{Binding EquipmentId, StringFormat='Equipment #{0}'}" />
+							<TextBlock Grid.Column="3" Text="{Binding ExpectedReturnDate, StringFormat='Due {0:MM/dd/yyyy}'}" />
+						</Grid>
+					</Border>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
 
-        <Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="#EAF5EF" BorderBrush="#A8D5C0" BorderThickness="1" CornerRadius="8">
-            <StackPanel Spacing="8">
-                <Button Content="Return Equipment"
+		<Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="#FDF2F8" BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="8">
+			<StackPanel Spacing="8">
+				<Button Content="Return Equipment"
                         Command="{Binding ReturnCommand}"
                         HorizontalAlignment="Left"
-                        Background="#2E7D5B"
+                        Background="#F472B6"
                         Foreground="White" />
 
-                <TextBlock Text="{Binding StatusMessage}"
-                           Foreground="#B45309"
+				<TextBlock Text="{Binding StatusMessage}"
+                           Foreground="#BE185D"
                            TextWrapping="Wrap" />
-            </StackPanel>
-        </Border>
-    </Grid>
+			</StackPanel>
+		</Border>
+	</Grid>
 </UserControl>
