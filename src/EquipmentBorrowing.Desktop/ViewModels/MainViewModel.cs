@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EquipmentBorrowing.Application.Services;
@@ -27,14 +28,16 @@ public partial class MainViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ShowEquipment()
+    private async Task ShowEquipment()
     {
+        await _equipmentViewModel.LoadAsync();
         CurrentPage = _equipmentViewModel;
     }
 
     [RelayCommand]
-    private void ShowBorrowings()
+    private async Task ShowBorrowings()
     {
+        await _borrowingsViewModel.LoadAsync();
         CurrentPage = _borrowingsViewModel;
     }
 }
