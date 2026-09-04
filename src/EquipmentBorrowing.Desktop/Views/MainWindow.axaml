@@ -8,30 +8,35 @@
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="Campus Equipment Borrowing System"
-        Width="900" Height="550">
+        Width="900" Height="550"
+        Background="#FFF5F7">
 
 	<Design.DataContext>
 		<vm:MainViewModel />
 	</Design.DataContext>
 
 	<DockPanel>
-		<Border DockPanel.Dock="Top" Padding="16" Background="#1E293B">
+		<Border DockPanel.Dock="Top" Padding="16" Background="#F472B6">
 			<TextBlock Text="Campus Equipment Borrowing System"
                        Foreground="White"
                        FontSize="18"
                        FontWeight="Bold" />
 		</Border>
 
-		<Border DockPanel.Dock="Left" Width="180" Background="#F1F5F9" Padding="12">
+		<Border DockPanel.Dock="Left" Width="180" Background="#FCE7F3" Padding="12">
 			<StackPanel Spacing="8">
 				<Button Content="Equipment"
                         Command="{Binding ShowEquipmentCommand}"
                         HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Left" />
+                        HorizontalContentAlignment="Left"
+                        Background="#FBCFE8"
+                        Foreground="#831843" />
 				<Button Content="Active Borrowings"
                         Command="{Binding ShowBorrowingsCommand}"
                         HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Left" />
+                        HorizontalContentAlignment="Left"
+                        Background="#FBCFE8"
+                        Foreground="#831843" />
 			</StackPanel>
 		</Border>
 

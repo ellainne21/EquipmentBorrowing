@@ -16,16 +16,19 @@
 
 		<TextBlock Grid.Row="0" Text="Equipment"
                    FontSize="20" FontWeight="Bold"
+                   Foreground="#831843"
                    Margin="0,0,0,12" />
 
 		<ListBox Grid.Row="1"
+                 Background="Transparent"
                  ItemsSource="{Binding EquipmentList}"
                  SelectedItem="{Binding SelectedEquipment}">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
-					<Border Padding="10" Margin="0,2" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4">
+					<Border Padding="10" Margin="0,2" Background="White"
+                            BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="6">
 						<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-							<TextBlock Grid.Column="0" Text="{Binding Id}" FontWeight="Bold" Width="40" />
+							<TextBlock Grid.Column="0" Text="{Binding Id}" FontWeight="Bold" Width="40" Foreground="#831843" />
 							<TextBlock Grid.Column="1" Text="{Binding Name}" />
 							<TextBlock Grid.Column="2"
                                        Text="{Binding IsAvailable, Converter={StaticResource BoolToAvailabilityConverter}}" />
@@ -35,9 +38,9 @@
 			</ListBox.ItemTemplate>
 		</ListBox>
 
-		<Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="#F8FAFC" CornerRadius="6">
+		<Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="#FDF2F8" BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="8">
 			<StackPanel Spacing="8">
-				<TextBlock Text="Borrow Equipment" FontWeight="Bold" />
+				<TextBlock Text="Borrow Equipment" FontWeight="Bold" Foreground="#831843" />
 
 				<ComboBox ItemsSource="{Binding Students}"
                           SelectedItem="{Binding SelectedStudent}"
@@ -54,10 +57,12 @@
 
 				<Button Content="Borrow Equipment"
                         Command="{Binding BorrowCommand}"
-                        HorizontalAlignment="Left" />
+                        HorizontalAlignment="Left"
+                        Background="#F472B6"
+                        Foreground="White" />
 
 				<TextBlock Text="{Binding StatusMessage}"
-                           Foreground="DarkRed"
+                           Foreground="#BE185D"
                            TextWrapping="Wrap" />
 			</StackPanel>
 		</Border>
