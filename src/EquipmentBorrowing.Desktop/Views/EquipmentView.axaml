@@ -1,0 +1,65 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+             xmlns:conv="using:EquipmentBorrowing.Desktop.Converters"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="EquipmentBorrowing.Desktop.Views.EquipmentView"
+             x:DataType="vm:EquipmentViewModel">
+
+	<UserControl.Resources>
+		<conv:BoolToAvailabilityConverter x:Key="BoolToAvailabilityConverter" />
+	</UserControl.Resources>
+
+	<Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
+
+		<TextBlock Grid.Row="0" Text="Equipment"
+                   FontSize="20" FontWeight="Bold"
+                   Margin="0,0,0,12" />
+
+		<ListBox Grid.Row="1"
+                 ItemsSource="{Binding EquipmentList}"
+                 SelectedItem="{Binding SelectedEquipment}">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<Border Padding="10" Margin="0,2" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4">
+						<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+							<TextBlock Grid.Column="0" Text="{Binding Id}" FontWeight="Bold" Width="40" />
+							<TextBlock Grid.Column="1" Text="{Binding Name}" />
+							<TextBlock Grid.Column="2"
+                                       Text="{Binding IsAvailable, Converter={StaticResource BoolToAvailabilityConverter}}" />
+						</Grid>
+					</Border>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+
+		<Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="#F8FAFC" CornerRadius="6">
+			<StackPanel Spacing="8">
+				<TextBlock Text="Borrow Equipment" FontWeight="Bold" />
+
+				<ComboBox ItemsSource="{Binding Students}"
+                          SelectedItem="{Binding SelectedStudent}"
+                          PlaceholderText="Select student"
+                          HorizontalAlignment="Stretch">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Name}" />
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+
+				<DatePicker SelectedDate="{Binding ExpectedReturnDate}" />
+
+				<Button Content="Borrow Equipment"
+                        Command="{Binding BorrowCommand}"
+                        HorizontalAlignment="Left" />
+
+				<TextBlock Text="{Binding StatusMessage}"
+                           Foreground="DarkRed"
+                           TextWrapping="Wrap" />
+			</StackPanel>
+		</Border>
+	</Grid>
+</UserControl>
