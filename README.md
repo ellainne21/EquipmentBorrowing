@@ -144,24 +144,25 @@ It uses `EquipmentBorrowing.Application` (to call the services) and `EquipmentBo
 
 ### 2. Updated Architecture
 
+```
 Avalonia View (MainWindow, EquipmentView, BorrowingsView)
-│
-│ Binding / Command
-▼
+        |
+        | Binding / Command
+        v
 ViewModel (MainViewModel, EquipmentViewModel, BorrowingsViewModel)
-│
-│ Application Operation
-▼
+        |
+        | Application Operation
+        v
 Application Service (BorrowEquipmentService, ReturnEquipmentService)
-│
-├──────────► Domain (Student, Equipment, Borrowing)
-│
-▼
+        |
+        +----------> Domain (Student, Equipment, Borrowing)
+        |
+        v
 Repository Interface (IStudentRepository, IEquipmentRepository, IBorrowingRepository)
-▲
-│
+        ^
+        |
 Infrastructure Implementation (InMemoryStudentRepository, InMemoryEquipmentRepository, InMemoryBorrowingRepository)
-
+```
 
 The Domain and Application layers from Lab 1 didn't really change. We just added the Desktop project on top of them.
 
