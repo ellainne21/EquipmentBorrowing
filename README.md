@@ -63,7 +63,7 @@
 - Manually wires up dependencies (Dependency Injection)
 
 ### 2. Dependency Direction
-
+```
 Demo / Future UI
       │
       ▼
@@ -71,7 +71,7 @@ Demo / Future UI
       ▲                  
       │                  
  Infrastructure ──────────┘
-
+```
 
 **Explanation:**
 - Application layer depends on Domain (uses entities)
