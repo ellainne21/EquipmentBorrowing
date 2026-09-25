@@ -63,7 +63,7 @@
 - Manually wires up dependencies (Dependency Injection)
 
 ### 2. Dependency Direction
-
+```
 Demo / Future UI
       │
       ▼
@@ -71,7 +71,7 @@ Demo / Future UI
       ▲                  
       │                  
  Infrastructure ──────────┘
-
+```
 
 **Explanation:**
 - Application layer depends on Domain (uses entities)
@@ -144,24 +144,25 @@ It uses `EquipmentBorrowing.Application` (to call the services) and `EquipmentBo
 
 ### 2. Updated Architecture
 
+```
 Avalonia View (MainWindow, EquipmentView, BorrowingsView)
-│
-│ Binding / Command
-▼
+        |
+        | Binding / Command
+        v
 ViewModel (MainViewModel, EquipmentViewModel, BorrowingsViewModel)
-│
-│ Application Operation
-▼
+        |
+        | Application Operation
+        v
 Application Service (BorrowEquipmentService, ReturnEquipmentService)
-│
-├──────────► Domain (Student, Equipment, Borrowing)
-│
-▼
+        |
+        +----------> Domain (Student, Equipment, Borrowing)
+        |
+        v
 Repository Interface (IStudentRepository, IEquipmentRepository, IBorrowingRepository)
-▲
-│
+        ^
+        |
 Infrastructure Implementation (InMemoryStudentRepository, InMemoryEquipmentRepository, InMemoryBorrowingRepository)
-
+```
 
 The Domain and Application layers from Lab 1 didn't really change. We just added the Desktop project on top of them.
 
@@ -189,19 +190,19 @@ The Domain and Application layers from Lab 1 didn't really change. We just added
 ### 5. Architectural Reflection
 
 **1. Why should the View not call a repository directly?**
-The View is only supposed to show things and take input. If it talked to the repository directly, it could skip all the rules (like checking if a student is allowed to borrow), since repositories don't know about those rules — only the Application layer does.
+- The View is only supposed to show things and take input. If it talked to the repository directly, it could skip all the rules (like checking if a student is allowed to borrow), since repositories don't know about those rules — only the Application layer does.
 
 **2. Why should business rules not be implemented in the ViewModel?**
-If we wrote the rules again inside the ViewModel, we'd have the same rule in two places. If we ever needed to change a rule, we'd have to remember to change it in both places, and it's easy to forget one. Keeping the rule in only one place (the Application layer) avoids that problem.
+- If we wrote the rules again inside the ViewModel, we'd have the same rule in two places. If we ever needed to change a rule, we'd have to remember to change it in both places, and it's easy to forget one. Keeping the rule in only one place (the Application layer) avoids that problem.
 
 **3. What is the responsibility of the ViewModel?**
-The ViewModel keeps track of what's on screen — like the list of equipment, what's selected, and any messages to show. It also has the commands (like "Borrow" or "Return") that the buttons use. It checks simple stuff like "did the user pick something," but it doesn't decide if a borrow is actually allowed — it just asks the service.
+- The ViewModel keeps track of what's on screen — like the list of equipment, what's selected, and any messages to show. It also has the commands (like "Borrow" or "Return") that the buttons use. It checks simple stuff like "did the user pick something," but it doesn't decide if a borrow is actually allowed — it just asks the service.
 
 **4. Why can the existing Application layer work without knowing that Avalonia is being used?**
-Because `BorrowEquipmentService` and `ReturnEquipmentService` only depend on the repository interfaces and the Domain classes — nothing about Avalonia. That means the same service code could be used by a totally different interface (like our console Demo app) without any changes.
+- Because `BorrowEquipmentService` and `ReturnEquipmentService` only depend on the repository interfaces and the Domain classes — nothing about Avalonia. That means the same service code could be used by a totally different interface (like our console Demo app) without any changes.
 
 **5. What advantage is gained from registering dependencies in one composition point?**
-Setting up everything in one place (`App.axaml.cs`) makes it easy to see how the whole app is wired together. If something needs to change — like using a different repository — we only need to update it in one spot, instead of hunting through the whole codebase.
+- Setting up everything in one place (`App.axaml.cs`) makes it easy to see how the whole app is wired together. If something needs to change — like using a different repository — we only need to update it in one spot, instead of hunting through the whole codebase.
 
 **6. If the in-memory repository were replaced by SQLite later, which parts of the current interface should remain largely unchanged?**
-Everything except the Infrastructure layer would stay the same — the Domain classes, the Application services, and the whole Desktop project (Views and ViewModels) wouldn't need to change at all. We would only need to write new SQLite versions of the repositories and swap them in during setup.
+- Everything except the Infrastructure layer would stay the same — the Domain classes, the Application services, and the whole Desktop project (Views and ViewModels) wouldn't need to change at all. We would only need to write new SQLite versions of the repositories and swap them in during setup.
