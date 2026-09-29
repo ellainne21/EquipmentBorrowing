@@ -207,180 +207,7 @@ The Domain and Application layers from Lab 1 didn't really change. We just added
 **6. If the in-memory repository were replaced by SQLite later, which parts of the current interface should remain largely unchanged?**
 - Everything except the Infrastructure layer would stay the same — the Domain classes, the Application services, and the whole Desktop project (Views and ViewModels) wouldn't need to change at all. We would only need to write new SQLite versions of the repositories and swap them in during setup.
 
-
-
----
-
 ## Laboratory Activity 3: Persistent Storage with SQLite and EF Core
-
-### Part N: Inspecting Generated SQL
-
-EF Core translates LINQ queries into SQL before sending them to SQLite.
-Using LINQ does not eliminate SQL — EF Core still builds and executes real
-SQL statements underneath. Below are three LINQ queries from the app, the
-SQL EF Core generated for each, and what that SQL does.
-
-### Query 1: Retrieve all equipment (Equipment page)
-
-**LINQ Query** (`EfEquipmentRepository.GetAllAsync`)
-```csharp
-return await _context.Equipment
-    .AsNoTracking()
-    .ToListAsync(cancellationToken);
-```
-
-**Generated SQL**
-```sql
-SELECT "e"."Id", "e"."IsAvailable", "e"."Name"
-FROM "Equipment" AS "e"
-```
-
-**Explanation**
-EF Core selects only the three columns the `Equipment` entity has, from
-the `Equipment` table. No joins or filters are needed since every row is
-returned. `AsNoTracking()` tells EF Core not to track these entities for
-changes, since this list is only for display.
-
----
-
-### Query 2: Active borrowings with student and equipment names
-
-**LINQ Query** (`EfBorrowingRepository.GetActiveBorrowingsAsync`)
-```csharp
-return await (
-    from b in _context.Borrowings.AsNoTracking()
-    join s in _context.Students.AsNoTracking() on b.StudentId equals s.Id
-    join e in _context.Equipment.AsNoTracking() on b.EquipmentId equals e.Id
-    where b.Status == BorrowingStatus.Active
-    select new ActiveBorrowingDetails
-    {
-        BorrowingId = b.Id,
-        StudentName = s.Name,
-        EquipmentName = e.Name,
-        DateBorrowed = b.DateBorrowed,
-        ExpectedReturnDate = b.ExpectedReturnDate
-    }
-).ToListAsync(cancellationToken);
-```
-
-**Generated SQL**
-```sql
-SELECT "b"."Id" AS "BorrowingId", "s"."Name" AS "StudentName",
-       "e"."Name" AS "EquipmentName", "b"."DateBorrowed",
-       "b"."ExpectedReturnDate"
-FROM "Borrowings" AS "b"
-INNER JOIN "Students" AS "s" ON "b"."StudentId" = "s"."Id"
-INNER JOIN "Equipment" AS "e" ON "b"."EquipmentId" = "e"."Id"
-WHERE "b"."Status" = 0
-```
-
-**Explanation**
-The LINQ `join` clauses become SQL `INNER JOIN`s. EF Core joins the
-`Borrowings` table to `Students` and `Equipment` on their foreign keys, so
-the query returns real names instead of raw IDs. The `where` clause
-becomes `WHERE "b"."Status" = 0`, since `BorrowingStatus.Active` is stored
-as the integer `0`. This fixed a UI bug where the Active Borrowings screen
-showed "Student #1" instead of "Alice Santos".
-
----
-
-### Query 3: Count of active borrowings for a student
-
-**LINQ Query** (`EfBorrowingRepository.GetActiveBorrowingsCountByStudentIdAsync`)
-```csharp
-return await _context.Borrowings
-    .CountAsync(b => b.StudentId == studentId && b.Status == BorrowingStatus.Active, cancellationToken);
-```
-
-**Generated SQL**
-```sql
-SELECT COUNT(*)
-FROM "Borrowings" AS "b"
-WHERE "b"."StudentId" = @studentId AND "b"."Status" = 0
-```
-
-**Explanation**
-`CountAsync` becomes SQL's `COUNT(*)`. Only a single number is returned,
-not the actual rows, so the database does the counting instead of EF Core
-loading every borrowing into memory. This query enforces the rule that a
-student cannot have more than 3 active borrowings at once.
-
----
-
-## Part O: Tracking and No-Tracking Queries
-
-EF Core tracks entities by default so it can detect changes and save them
-later. Tracking has a small memory and performance cost, so it should only
-be used when an entity will actually be modified.
-
-**Read-only queries use `AsNoTracking()`**
-
-- `EfStudentRepository.GetByIdAsync` and `GetAllAsync` — students are only
-  displayed (in the borrow dropdown), never changed.
-- `EfEquipmentRepository.GetAllAsync` — the equipment list is only
-  displayed.
-- `EfBorrowingRepository.GetActiveBorrowingsAsync` — the active borrowings
-  list is only displayed.
-
-**Tracked queries (no `AsNoTracking()`)**
-
-- `EfEquipmentRepository.GetByIdAsync` — used by `BorrowEquipmentService`
-  and `ReturnEquipmentService`, which call `MarkAsBorrowed()` or
-  `MarkAsReturned()` on the result and then save it. EF Core needs to
-  track the entity to detect that change.
-- `EfBorrowingRepository.GetByIdAsync` — used by `ReturnEquipmentService`,
-  which calls `MarkAsReturned()` on the result and saves it.
-
-**Why this matters**
-
-If `AsNoTracking()` were used on `GetByIdAsync` for equipment or
-borrowings, EF Core would not notice that `MarkAsBorrowed()` or
-`MarkAsReturned()` changed the object, and `SaveChangesAsync()` would have
-nothing to save. Tracking must stay on for any entity that will be
-modified and saved. Conversely, using tracking on a display-only list
-would waste memory tracking objects that are never going to change.
-
----
-
-## Part P: Confirming UI and Database Separation
-
-The application keeps a clear separation between the user interface and
-the database, following the same layered architecture from Labs 1 and 2:
-
-```
-Avalonia View (EquipmentView, BorrowingsView)
-↓ binding / command
-ViewModel (EquipmentViewModel, BorrowingsViewModel)
-↓ calls
-Application Service (BorrowEquipmentService, ReturnEquipmentService)
-↓ uses
-Repository Interface (IStudentRepository, IEquipmentRepository, IBorrowingRepository)
-↓ implemented by
-Ef...Repository (EfStudentRepository, EfEquipmentRepository, EfBorrowingRepository)
-↓ uses
-AppDbContext → SQLite database
-```
-
-
-**What this means in practice**
-
-- No `.axaml` view or ViewModel references `AppDbContext`, EF Core, or
-  SQLite anywhere. They only know about `IStudentRepository`,
-  `IEquipmentRepository`, and `IBorrowingRepository`.
-- All SQL is generated inside the three `Ef...Repository` classes in the
-  Infrastructure project. No SQL, LINQ-to-database queries, or EF Core
-  types appear in Desktop, Application, or Domain.
-- `BorrowEquipmentService` and `ReturnEquipmentService` are unchanged from
-  Lab 1 and Lab 2. Switching from in-memory storage to SQLite in Lab 3
-  only required writing new repository classes and updating the
-  dependency injection setup in `App.axaml.cs` — no service, ViewModel,
-  or View code needed to change.
-- This confirms the same conclusion reached in the Lab 1 and Lab 2
-  reflection questions: because every layer only depends on interfaces
-  from the layer below it, the real database technology can change
-  without forcing changes anywhere else in the application.
-
-  ---
 
 ### Part B: Database Design
 
@@ -453,4 +280,290 @@ versions match.
 A version conflict (NU1605) appeared because the Desktop project's
 `Microsoft.Extensions.DependencyInjection` package was on a different
 version than what EF Core 10.0.12 expected. Pinning Desktop's package to
-the same
+the same 10.0.12 version resolved it. This is a normal part of adding EF
+Core to a solution that already has its own dependency injection setup.
+
+---
+
+### Part E: AppDbContext
+
+`Infrastructure/Data/AppDbContext.cs` defines the bridge between the
+Domain entities and the database:
+
+```csharp
+public class AppDbContext : DbContext
+{
+    public DbSet<Student> Students => Set<Student>();
+    public DbSet<Equipment> Equipment => Set<Equipment>();
+    public DbSet<Borrowing> Borrowings => Set<Borrowing>();
+
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options) { }
+}
+```
+
+It takes its configuration through the constructor (`DbContextOptions`)
+rather than hardcoding a connection string, so the same class works both
+for the running app (pointed at the real SQLite file) and for EF Core's
+design-time tools (pointed at wherever `AppDbContextFactory` says).
+
+---
+
+### Part F: Entity Configuration
+
+`OnModelCreating` in `AppDbContext` configures each entity with the
+Fluent API:
+
+- Every entity's `Id` is set as the primary key.
+- `Name` on `Student` and `Equipment` is required, with a max length of
+  200 characters.
+- `Borrowing.Status` (a C# enum) is stored as a plain integer with
+  `HasConversion<int>()`, so SQLite stores `0` for Active and `1` for
+  Returned instead of a string.
+- `Borrowing.StudentId` and `Borrowing.EquipmentId` are configured as
+  foreign keys to `Students.Id` and `Equipment.Id`, both using
+  `DeleteBehavior.Restrict` — a Student or Equipment row cannot be
+  deleted while a Borrowing still references it.
+
+No explicit unique constraints were added. `Student.Name` and
+`Equipment.Name` are not required to be unique, since two students could
+share a name, and two identical pieces of equipment (e.g. two of the same
+model of laptop) would need separate rows with the same name in a real
+deployment. EF Core does automatically create indexes on both foreign
+keys (`IX_Borrowings_StudentId`, `IX_Borrowings_EquipmentId`), confirmed
+in DB Browser for SQLite, which speeds up the joins used in Part M.
+
+---
+
+### Part G: Migration and Database Creation
+
+The `InitialCreate` migration was generated and applied with `dotnet ef`:
+
+dotnet ef migrations add InitialCreate --project src/EquipmentBorrowing.Infrastructure
+dotnet ef database update --project src/EquipmentBorrowing.Infrastructure
+
+The database file location is decided by
+`AppDbContextFactory.GetDbPath()`, which returns:
+
+%LOCALAPPDATA%\EquipmentBorrowing\equipmentborrowing.db
+
+
+An absolute path under the user's LocalAppData folder was used instead of
+a relative path, so the database always lands in a predictable, per-user
+location no matter which folder the app is launched from — a relative
+path had initially put the file inside the Infrastructure project folder
+by accident, which is not appropriate for a real application's data.
+
+`IDesignTimeDbContextFactory` is implemented so that `dotnet ef` commands
+can construct an `AppDbContext` at design time (when creating a
+migration), without needing the full dependency injection container that
+the running app uses.
+
+---
+
+### Part H: EF Core Repositories
+
+Three repository classes were added to
+`Infrastructure/Repositories/`, each implementing the same interface as
+its in-memory counterpart from Lab 1, but backed by `AppDbContext`
+instead of a `List<T>`:
+
+- `EfStudentRepository`
+- `EfEquipmentRepository`
+- `EfBorrowingRepository`
+
+Each method either reads with `AsNoTracking()` for display-only data, or
+keeps tracking on when the calling service is going to modify and save
+the entity. See Part O for the full explanation of which is used where
+and why.
+
+The original in-memory repositories (`InMemoryStudentRepository`,
+`InMemoryEquipmentRepository`, `InMemoryBorrowingRepository`) were kept
+in the project rather than deleted. They still compile and satisfy the
+same interfaces, so they remain available as a reference or for testing
+without a real database, even though the app no longer uses them at
+runtime.
+
+---
+
+### Part I: Confirming the Application Services
+
+`BorrowEquipmentService` and `ReturnEquipmentService` needed **no
+changes** to work with the new EF Core repositories. Both classes depend
+only on `IStudentRepository`, `IEquipmentRepository`, and
+`IBorrowingRepository` — never on `InMemory...` classes, `AppDbContext`,
+or anything EF Core or SQLite specific.
+
+This confirms the same point made in the Lab 1 and Lab 2 reflection
+questions: because the services depend on interfaces, not on any specific
+storage technology, swapping in-memory storage for a real database only
+required writing new repository classes (Part H) and updating dependency
+injection (Part J) — no business logic anywhere had to change.
+
+---
+
+### Part N: Inspecting Generated SQL
+
+EF Core translates LINQ queries into SQL before sending them to SQLite.
+Using LINQ does not eliminate SQL — EF Core still builds and executes real
+SQL statements underneath. Below are three LINQ queries from the app, the
+SQL EF Core generated for each, and what that SQL does.
+
+#### Query 1: Retrieve all equipment (Equipment page)
+
+**LINQ Query** (`EfEquipmentRepository.GetAllAsync`)
+```csharp
+return await _context.Equipment
+    .AsNoTracking()
+    .ToListAsync(cancellationToken);
+```
+
+**Generated SQL**
+```sql
+SELECT "e"."Id", "e"."IsAvailable", "e"."Name"
+FROM "Equipment" AS "e"
+```
+
+**Explanation**
+EF Core selects only the three columns the `Equipment` entity has, from
+the `Equipment` table. No joins or filters are needed since every row is
+returned. `AsNoTracking()` tells EF Core not to track these entities for
+changes, since this list is only for display.
+
+---
+
+#### Query 2: Active borrowings with student and equipment names
+
+**LINQ Query** (`EfBorrowingRepository.GetActiveBorrowingsAsync`)
+```csharp
+return await (
+    from b in _context.Borrowings.AsNoTracking()
+    join s in _context.Students.AsNoTracking() on b.StudentId equals s.Id
+    join e in _context.Equipment.AsNoTracking() on b.EquipmentId equals e.Id
+    where b.Status == BorrowingStatus.Active
+    select new ActiveBorrowingDetails
+    {
+        BorrowingId = b.Id,
+        StudentName = s.Name,
+        EquipmentName = e.Name,
+        DateBorrowed = b.DateBorrowed,
+        ExpectedReturnDate = b.ExpectedReturnDate
+    }
+).ToListAsync(cancellationToken);
+```
+
+**Generated SQL**
+```sql
+SELECT "b"."Id" AS "BorrowingId", "s"."Name" AS "StudentName",
+       "e"."Name" AS "EquipmentName", "b"."DateBorrowed",
+       "b"."ExpectedReturnDate"
+FROM "Borrowings" AS "b"
+INNER JOIN "Students" AS "s" ON "b"."StudentId" = "s"."Id"
+INNER JOIN "Equipment" AS "e" ON "b"."EquipmentId" = "e"."Id"
+WHERE "b"."Status" = 0
+```
+
+**Explanation**
+The LINQ `join` clauses become SQL `INNER JOIN`s. EF Core joins the
+`Borrowings` table to `Students` and `Equipment` on their foreign keys, so
+the query returns real names instead of raw IDs. The `where` clause
+becomes `WHERE "b"."Status" = 0`, since `BorrowingStatus.Active` is stored
+as the integer `0`. This fixed a UI bug where the Active Borrowings screen
+showed "Student #1" instead of "Alice Santos".
+
+---
+
+#### Query 3: Count of active borrowings for a student
+
+**LINQ Query** (`EfBorrowingRepository.GetActiveBorrowingsCountByStudentIdAsync`)
+```csharp
+return await _context.Borrowings
+    .CountAsync(b => b.StudentId == studentId && b.Status == BorrowingStatus.Active, cancellationToken);
+```
+
+**Generated SQL**
+```sql
+SELECT COUNT(*)
+FROM "Borrowings" AS "b"
+WHERE "b"."StudentId" = @studentId AND "b"."Status" = 0
+```
+
+**Explanation**
+`CountAsync` becomes SQL's `COUNT(*)`. Only a single number is returned,
+not the actual rows, so the database does the counting instead of EF Core
+loading every borrowing into memory. This query enforces the rule that a
+student cannot have more than 3 active borrowings at once.
+
+---
+
+### Part O: Tracking and No-Tracking Queries
+
+EF Core tracks entities by default so it can detect changes and save them
+later. Tracking has a small memory and performance cost, so it should only
+be used when an entity will actually be modified.
+
+**Read-only queries use `AsNoTracking()`**
+
+- `EfStudentRepository.GetByIdAsync` and `GetAllAsync` — students are only
+  displayed (in the borrow dropdown), never changed.
+- `EfEquipmentRepository.GetAllAsync` — the equipment list is only
+  displayed.
+- `EfBorrowingRepository.GetActiveBorrowingsAsync` — the active borrowings
+  list is only displayed.
+
+**Tracked queries (no `AsNoTracking()`)**
+
+- `EfEquipmentRepository.GetByIdAsync` — used by `BorrowEquipmentService`
+  and `ReturnEquipmentService`, which call `MarkAsBorrowed()` or
+  `MarkAsReturned()` on the result and then save it. EF Core needs to
+  track the entity to detect that change.
+- `EfBorrowingRepository.GetByIdAsync` — used by `ReturnEquipmentService`,
+  which calls `MarkAsReturned()` on the result and saves it.
+
+**Why this matters**
+
+If `AsNoTracking()` were used on `GetByIdAsync` for equipment or
+borrowings, EF Core would not notice that `MarkAsBorrowed()` or
+`MarkAsReturned()` changed the object, and `SaveChangesAsync()` would have
+nothing to save. Tracking must stay on for any entity that will be
+modified and saved. Conversely, using tracking on a display-only list
+would waste memory tracking objects that are never going to change.
+
+---
+
+### Part P: Confirming UI and Database Separation
+
+The application keeps a clear separation between the user interface and
+the database, following the same layered architecture from Labs 1 and 2:
+
+```
+Avalonia View (EquipmentView, BorrowingsView)
+↓ binding / command
+ViewModel (EquipmentViewModel, BorrowingsViewModel)
+↓ calls
+Application Service (BorrowEquipmentService, ReturnEquipmentService)
+↓ uses
+Repository Interface (IStudentRepository, IEquipmentRepository, IBorrowingRepository)
+↓ implemented by
+Ef...Repository (EfStudentRepository, EfEquipmentRepository, EfBorrowingRepository)
+↓ uses
+AppDbContext → SQLite database
+```
+
+**What this means in practice**
+
+- No `.axaml` view or ViewModel references `AppDbContext`, EF Core, or
+  SQLite anywhere. They only know about `IStudentRepository`,
+  `IEquipmentRepository`, and `IBorrowingRepository`.
+- All SQL is generated inside the three `Ef...Repository` classes in the
+  Infrastructure project. No SQL, LINQ-to-database queries, or EF Core
+  types appear in Desktop, Application, or Domain.
+- `BorrowEquipmentService` and `ReturnEquipmentService` are unchanged from
+  Lab 1 and Lab 2. Switching from in-memory storage to SQLite in Lab 3
+  only required writing new repository classes and updating the
+  dependency injection setup in `App.axaml.cs` — no service, ViewModel,
+  or View code needed to change.
+- This confirms the same conclusion reached in the Lab 1 and Lab 2
+  reflection questions: because every layer only depends on interfaces
+  from the layer below it, the real database technology can change
+  without forcing changes anywhere else in the application.
