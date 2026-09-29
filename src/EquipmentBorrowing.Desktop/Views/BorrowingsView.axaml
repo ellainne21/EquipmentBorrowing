@@ -23,9 +23,9 @@
 					<Border Padding="10" Margin="0,2" Background="White"
                             BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="6">
 						<Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
-							<TextBlock Grid.Column="0" Text="{Binding Id}" FontWeight="Bold" Width="50" Foreground="#831843" />
-							<TextBlock Grid.Column="1" Text="{Binding StudentId, StringFormat='Student #{0}'}" />
-							<TextBlock Grid.Column="2" Text="{Binding EquipmentId, StringFormat='Equipment #{0}'}" />
+							<TextBlock Grid.Column="0" Text="{Binding BorrowingId}" FontWeight="Bold" Width="50" Foreground="#831843" />
+							<TextBlock Grid.Column="1" Text="{Binding StudentName}" />
+							<TextBlock Grid.Column="2" Text="{Binding EquipmentName}" />
 							<TextBlock Grid.Column="3" Text="{Binding ExpectedReturnDate, StringFormat='Due {0:MM/dd/yyyy}'}" />
 						</Grid>
 					</Border>

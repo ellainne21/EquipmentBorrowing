@@ -7,7 +7,6 @@ public class InMemoryEquipmentRepository : IEquipmentRepository
 {
     private readonly List<Equipment> _equipments = new();
 
-    // Helper method to add test data
     public void Seed(Equipment equipment) => _equipments.Add(equipment);
 
     public Task<Equipment?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -21,9 +20,14 @@ public class InMemoryEquipmentRepository : IEquipmentRepository
         return Task.FromResult<IEnumerable<Equipment>>(_equipments);
     }
 
+    public Task<IEnumerable<Equipment>> GetAvailableAsync(CancellationToken cancellationToken = default)
+    {
+        var available = _equipments.Where(e => e.IsAvailable);
+        return Task.FromResult<IEnumerable<Equipment>>(available);
+    }
+
     public Task UpdateAsync(Equipment equipment, CancellationToken cancellationToken = default)
     {
-        // In-memory: object is already updated, nothing to do
         return Task.CompletedTask;
     }
 }

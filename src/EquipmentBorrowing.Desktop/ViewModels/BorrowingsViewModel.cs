@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EquipmentBorrowing.Application.Interfaces;
+using EquipmentBorrowing.Application.Models;
 using EquipmentBorrowing.Application.Services;
-using EquipmentBorrowing.Domain;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
 
@@ -13,10 +13,10 @@ public partial class BorrowingsViewModel : ViewModelBase
     private readonly IBorrowingRepository _borrowingRepository;
     private readonly ReturnEquipmentService _returnEquipmentService;
 
-    public ObservableCollection<Borrowing> ActiveBorrowings { get; } = new();
+    public ObservableCollection<ActiveBorrowingDetails> ActiveBorrowings { get; } = new();
 
     [ObservableProperty]
-    public partial Borrowing? SelectedBorrowing { get; set; }
+    public partial ActiveBorrowingDetails? SelectedBorrowing { get; set; }
 
     [ObservableProperty]
     public partial string? StatusMessage { get; set; }
@@ -56,7 +56,7 @@ public partial class BorrowingsViewModel : ViewModelBase
             return;
         }
 
-        var result = await _returnEquipmentService.ExecuteAsync(SelectedBorrowing.Id);
+        var result = await _returnEquipmentService.ExecuteAsync(SelectedBorrowing.BorrowingId);
         StatusMessage = result;
 
         await LoadAsync();
