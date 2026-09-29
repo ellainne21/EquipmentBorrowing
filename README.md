@@ -422,3 +422,35 @@ The diagram was made in a separate modeling tool and exported as an
 image. It reflects the actual database exactly as EF Core created it —
 column names, types, and the two foreign keys all match what `dotnet ef`
 generated in the `InitialCreate` migration.
+
+---
+
+### Part C: Sample Database Queries
+
+Five representative SQL queries are written directly against the schema
+in `docs/database-queries.sql`, before any C# code touches the database:
+
+1. Select all equipment.
+2. Filter equipment to only available items.
+3. Join active borrowings with the related student and equipment names.
+4. Aggregate: count of active borrowings per student.
+5. Update a single equipment row's availability.
+
+Writing these first, in plain SQL, made it easier to design the LINQ
+queries later in Part M — each of the three required LINQ queries has a
+direct SQL counterpart in this file.
+
+---
+
+### Part D: Adding SQLite and EF Core
+
+Two NuGet packages were added to the Infrastructure project:
+`Microsoft.EntityFrameworkCore.Sqlite` and
+`Microsoft.EntityFrameworkCore.Design` (version 10.0.12), along with the
+`dotnet-ef` global tool at the same version, so the tool and the package
+versions match.
+
+A version conflict (NU1605) appeared because the Desktop project's
+`Microsoft.Extensions.DependencyInjection` package was on a different
+version than what EF Core 10.0.12 expected. Pinning Desktop's package to
+the same
