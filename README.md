@@ -380,3 +380,45 @@ AppDbContext → SQLite database
   from the layer below it, the real database technology can change
   without forcing changes anywhere else in the application.
 
+  ---
+
+### Part B: Database Design
+
+The database uses exactly three tables, matching the three Domain entities
+from Lab 1: `Students`, `Equipment`, and `Borrowings`.
+
+**Students**
+| Column | Type | Notes |
+|---|---|---|
+| Id | INTEGER | Primary key |
+| Name | TEXT | Required, max length 200 |
+| IsAllowedToBorrow | INTEGER | 0 or 1 |
+
+**Equipment**
+| Column | Type | Notes |
+|---|---|---|
+| Id | INTEGER | Primary key |
+| Name | TEXT | Required, max length 200 |
+| IsAvailable | INTEGER | 0 or 1 |
+
+**Borrowings**
+| Column | Type | Notes |
+|---|---|---|
+| Id | INTEGER | Primary key |
+| StudentId | INTEGER | Foreign key → Students.Id |
+| EquipmentId | INTEGER | Foreign key → Equipment.Id |
+| DateBorrowed | TEXT (DateTime) | Required |
+| ExpectedReturnDate | TEXT (DateTime) | Required |
+| Status | INTEGER | 0 = Active, 1 = Returned |
+
+**Relationships:** one Student has many Borrowings; one Equipment appears
+in many Borrowings. Both foreign keys use `DeleteBehavior.Restrict`, so a
+Student or Equipment row cannot be deleted while it still has related
+Borrowings — this protects the borrowing history from being silently lost.
+
+![Database Diagram](docs/database-diagram.png)
+
+The diagram was made in a separate modeling tool and exported as an
+image. It reflects the actual database exactly as EF Core created it —
+column names, types, and the two foreign keys all match what `dotnet ef`
+generated in the `InitialCreate` migration.
