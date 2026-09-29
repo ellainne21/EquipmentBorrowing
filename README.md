@@ -339,3 +339,44 @@ borrowings, EF Core would not notice that `MarkAsBorrowed()` or
 nothing to save. Tracking must stay on for any entity that will be
 modified and saved. Conversely, using tracking on a display-only list
 would waste memory tracking objects that are never going to change.
+
+---
+
+## Part P: Confirming UI and Database Separation
+
+The application keeps a clear separation between the user interface and
+the database, following the same layered architecture from Labs 1 and 2:
+
+```
+Avalonia View (EquipmentView, BorrowingsView)
+↓ binding / command
+ViewModel (EquipmentViewModel, BorrowingsViewModel)
+↓ calls
+Application Service (BorrowEquipmentService, ReturnEquipmentService)
+↓ uses
+Repository Interface (IStudentRepository, IEquipmentRepository, IBorrowingRepository)
+↓ implemented by
+Ef...Repository (EfStudentRepository, EfEquipmentRepository, EfBorrowingRepository)
+↓ uses
+AppDbContext → SQLite database
+```
+
+
+**What this means in practice**
+
+- No `.axaml` view or ViewModel references `AppDbContext`, EF Core, or
+  SQLite anywhere. They only know about `IStudentRepository`,
+  `IEquipmentRepository`, and `IBorrowingRepository`.
+- All SQL is generated inside the three `Ef...Repository` classes in the
+  Infrastructure project. No SQL, LINQ-to-database queries, or EF Core
+  types appear in Desktop, Application, or Domain.
+- `BorrowEquipmentService` and `ReturnEquipmentService` are unchanged from
+  Lab 1 and Lab 2. Switching from in-memory storage to SQLite in Lab 3
+  only required writing new repository classes and updating the
+  dependency injection setup in `App.axaml.cs` — no service, ViewModel,
+  or View code needed to change.
+- This confirms the same conclusion reached in the Lab 1 and Lab 2
+  reflection questions: because every layer only depends on interfaces
+  from the layer below it, the real database technology can change
+  without forcing changes anywhere else in the application.
+
