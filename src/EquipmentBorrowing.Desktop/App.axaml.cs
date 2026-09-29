@@ -53,7 +53,10 @@ public partial class App : Avalonia.Application
 
         // Transient: every repository gets its own DbContext, so no old data is kept in memory
         services.AddDbContext<AppDbContext>(
-            options => options.UseSqlite($"Data Source={dbPath}"),
+            options => options
+               .UseSqlite($"Data Source={dbPath}")
+               .LogTo(message => System.Diagnostics.Debug.WriteLine(message), Microsoft.Extensions.Logging.LogLevel.Information)
+               .EnableSensitiveDataLogging(),
             ServiceLifetime.Transient);
 
         // Repositories (EF Core / SQLite)
