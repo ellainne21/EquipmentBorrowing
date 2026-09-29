@@ -567,3 +567,125 @@ AppDbContext → SQLite database
   reflection questions: because every layer only depends on interfaces
   from the layer below it, the real database technology can change
   without forcing changes anywhere else in the application.
+
+  ---
+
+### Part J: Switching Dependency Injection to EF Core
+
+`App.axaml.cs` was updated so the app registers the EF Core repositories
+instead of the in-memory ones, and applies migrations automatically on
+startup:
+
+```csharp
+services.AddDbContext<AppDbContext>(
+    options => options.UseSqlite($"Data Source={dbPath}"),
+    ServiceLifetime.Transient);
+
+services.AddTransient<IStudentRepository, EfStudentRepository>();
+services.AddTransient<IEquipmentRepository, EfEquipmentRepository>();
+services.AddTransient<IBorrowingRepository, EfBorrowingRepository>();
+```
+
+**Why `Transient` instead of `Singleton`.** In Lab 2, the in-memory
+repositories were registered as Singletons, so the same `List<T>` stayed
+alive for the whole run of the app. A database `DbContext` should not be
+kept alive that way — a desktop app has no natural "request" boundary
+like a web app does to scope it to, so `Transient` gives each repository
+call its own short-lived `DbContext`, which is the safest default for a
+desktop application.
+
+**Applying migrations at startup.** Right after building the service
+provider, `DatabaseInitializer.Initialize()` calls
+`context.Database.Migrate()`. This applies any migrations that have not
+yet run, and does nothing if the database is already up to date — it
+never recreates or drops the database, which matches the lab's
+requirement that the app "not recreate the database at every launch."
+
+---
+
+### Part K: Persistence Test
+
+To confirm the data survives a full restart, not just navigation within
+the running app:
+
+1. Borrowed equipment as a student (Alice Santos, Laptop Dell XPS 15) —
+   the equipment list updated to "Unavailable" immediately.
+2. Confirmed the new borrowing appeared in Active Borrowings.
+3. **Closed the app completely** and reopened it.
+4. Checked Equipment — 101 Laptop Dell XPS 15 was still "Unavailable."
+5. Checked Active Borrowings — the same borrowing was still listed.
+6. Clicked Return Equipment — the app confirmed the return, the
+   borrowing disappeared from Active Borrowings, and the equipment
+   returned to "Available."
+
+Every step behaved correctly, which confirms the data is genuinely being
+written to and read from the SQLite file, not just held in memory for the
+lifetime of the running process.
+
+---
+
+### Part L: Seeding Initial Data
+
+`DatabaseInitializer.SeedIfEmpty()` inserts starting data only if the
+relevant table is currently empty:
+
+```csharp
+if (!context.Students.Any())
+{
+    context.Students.Add(new Student(1, "Alice Santos", true));
+    context.Students.Add(new Student(2, "Bob Reyes", false));
+}
+
+if (!context.Equipment.Any())
+{
+    context.Equipment.Add(new Equipment(101, "Laptop Dell XPS 15"));
+    context.Equipment.Add(new Equipment(102, "Projector Epson"));
+    context.Equipment.Add(new Equipment(103, "Arduino Kit"));
+
+    var camera = new Equipment(104, "Canon Camera");
+    camera.MarkAsBorrowed();
+    context.Equipment.Add(camera);
+}
+```
+
+Checking `.Any()` before seeding means the app can be closed and reopened
+any number of times without duplicating rows or throwing a primary key
+error — a plain "always insert on startup" approach would fail the second
+time the app runs.
+
+Equipment 104 (Canon Camera) is seeded already unavailable, by calling
+`MarkAsBorrowed()` right after construction, so the app has a real
+example of an unavailable item to demonstrate the "equipment
+unavailable" failure case without needing to borrow something first.
+
+No `Borrowings` are seeded, on purpose — the persistence test in Part K
+needed to create a real borrowing through the running app, not start with
+one already in the database.
+
+---
+
+### Part M: LINQ Queries
+
+Three LINQ queries were added across the repositories, each demonstrating
+a different kind of query:
+
+1. **Filtering** — `EfEquipmentRepository.GetAvailableAsync()` returns
+   only equipment where `IsAvailable` is true, using a `Where` clause.
+2. **Joining** — `EfBorrowingRepository.GetActiveBorrowingsAsync()` joins
+   `Borrowings` with `Students` and `Equipment` to return real names
+   instead of raw foreign key IDs. This is documented in full, with the
+   generated SQL, in Part N (Query 2).
+3. **Aggregating** — `EfBorrowingRepository.GetActiveBorrowingsCountByStudentIdAsync()`
+   counts a student's active borrowings directly in the database with
+   `CountAsync`, rather than loading every row into memory and counting
+   in C#. This is documented in full in Part N (Query 3).
+
+Adding Query 2 (the join) also fixed a real bug: the Active Borrowings
+screen was showing "Student #1" and "Equipment #101" instead of actual
+names, because `Borrowing` only stores foreign key IDs, not navigation
+properties to the related `Student` or `Equipment`. A new
+`ActiveBorrowingDetails` class in `Application/Models/` was introduced to
+carry the joined result — `BorrowingId`, `StudentName`, `EquipmentName`,
+`DateBorrowed`, `ExpectedReturnDate` — and `BorrowingsViewModel` and
+`BorrowingsView.axaml` were updated to bind to it instead of the raw
+`Borrowing` entity.
