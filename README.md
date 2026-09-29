@@ -689,7 +689,3 @@ AppDbContext → SQLite database
   reflection questions: because every layer only depends on interfaces
   from the layer below it, the real database technology can change
   without forcing changes anywhere else in the application.
-
- 
-`BorrowingsView.axaml` were updated to bind to it instead of the raw
-`Borrowing` entity.
