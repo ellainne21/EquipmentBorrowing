@@ -7,6 +7,7 @@
     <Project Path="src/EquipmentBorrowing.Infrastructure/EquipmentBorrowing.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <File Path="src/EquipmentBorrowing.Infrastructure/Repositories/InMemoryEquipmentRepository.cs" />
     <Project Path="tests/EquipmentBorrowing.Tests/EquipmentBorrowing.Tests.csproj" />
   </Folder>
 </Solution>
