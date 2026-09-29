@@ -304,3 +304,38 @@ WHERE "b"."StudentId" = @studentId AND "b"."Status" = 0
 not the actual rows, so the database does the counting instead of EF Core
 loading every borrowing into memory. This query enforces the rule that a
 student cannot have more than 3 active borrowings at once.
+
+---
+
+## Part O: Tracking and No-Tracking Queries
+
+EF Core tracks entities by default so it can detect changes and save them
+later. Tracking has a small memory and performance cost, so it should only
+be used when an entity will actually be modified.
+
+**Read-only queries use `AsNoTracking()`**
+
+- `EfStudentRepository.GetByIdAsync` and `GetAllAsync` — students are only
+  displayed (in the borrow dropdown), never changed.
+- `EfEquipmentRepository.GetAllAsync` — the equipment list is only
+  displayed.
+- `EfBorrowingRepository.GetActiveBorrowingsAsync` — the active borrowings
+  list is only displayed.
+
+**Tracked queries (no `AsNoTracking()`)**
+
+- `EfEquipmentRepository.GetByIdAsync` — used by `BorrowEquipmentService`
+  and `ReturnEquipmentService`, which call `MarkAsBorrowed()` or
+  `MarkAsReturned()` on the result and then save it. EF Core needs to
+  track the entity to detect that change.
+- `EfBorrowingRepository.GetByIdAsync` — used by `ReturnEquipmentService`,
+  which calls `MarkAsReturned()` on the result and saves it.
+
+**Why this matters**
+
+If `AsNoTracking()` were used on `GetByIdAsync` for equipment or
+borrowings, EF Core would not notice that `MarkAsBorrowed()` or
+`MarkAsReturned()` changed the object, and `SaveChangesAsync()` would have
+nothing to save. Tracking must stay on for any entity that will be
+modified and saved. Conversely, using tracking on a display-only list
+would waste memory tracking objects that are never going to change.
