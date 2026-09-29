@@ -206,3 +206,101 @@ The Domain and Application layers from Lab 1 didn't really change. We just added
 
 **6. If the in-memory repository were replaced by SQLite later, which parts of the current interface should remain largely unchanged?**
 - Everything except the Infrastructure layer would stay the same — the Domain classes, the Application services, and the whole Desktop project (Views and ViewModels) wouldn't need to change at all. We would only need to write new SQLite versions of the repositories and swap them in during setup.
+
+
+
+---
+
+## Laboratory Activity 3: Persistent Storage with SQLite and EF Core
+
+### Part N: Inspecting Generated SQL
+
+EF Core translates LINQ queries into SQL before sending them to SQLite.
+Using LINQ does not eliminate SQL — EF Core still builds and executes real
+SQL statements underneath. Below are three LINQ queries from the app, the
+SQL EF Core generated for each, and what that SQL does.
+
+### Query 1: Retrieve all equipment (Equipment page)
+
+**LINQ Query** (`EfEquipmentRepository.GetAllAsync`)
+```csharp
+return await _context.Equipment
+    .AsNoTracking()
+    .ToListAsync(cancellationToken);
+```
+
+**Generated SQL**
+```sql
+SELECT "e"."Id", "e"."IsAvailable", "e"."Name"
+FROM "Equipment" AS "e"
+```
+
+**Explanation**
+EF Core selects only the three columns the `Equipment` entity has, from
+the `Equipment` table. No joins or filters are needed since every row is
+returned. `AsNoTracking()` tells EF Core not to track these entities for
+changes, since this list is only for display.
+
+---
+
+### Query 2: Active borrowings with student and equipment names
+
+**LINQ Query** (`EfBorrowingRepository.GetActiveBorrowingsAsync`)
+```csharp
+return await (
+    from b in _context.Borrowings.AsNoTracking()
+    join s in _context.Students.AsNoTracking() on b.StudentId equals s.Id
+    join e in _context.Equipment.AsNoTracking() on b.EquipmentId equals e.Id
+    where b.Status == BorrowingStatus.Active
+    select new ActiveBorrowingDetails
+    {
+        BorrowingId = b.Id,
+        StudentName = s.Name,
+        EquipmentName = e.Name,
+        DateBorrowed = b.DateBorrowed,
+        ExpectedReturnDate = b.ExpectedReturnDate
+    }
+).ToListAsync(cancellationToken);
+```
+
+**Generated SQL**
+```sql
+SELECT "b"."Id" AS "BorrowingId", "s"."Name" AS "StudentName",
+       "e"."Name" AS "EquipmentName", "b"."DateBorrowed",
+       "b"."ExpectedReturnDate"
+FROM "Borrowings" AS "b"
+INNER JOIN "Students" AS "s" ON "b"."StudentId" = "s"."Id"
+INNER JOIN "Equipment" AS "e" ON "b"."EquipmentId" = "e"."Id"
+WHERE "b"."Status" = 0
+```
+
+**Explanation**
+The LINQ `join` clauses become SQL `INNER JOIN`s. EF Core joins the
+`Borrowings` table to `Students` and `Equipment` on their foreign keys, so
+the query returns real names instead of raw IDs. The `where` clause
+becomes `WHERE "b"."Status" = 0`, since `BorrowingStatus.Active` is stored
+as the integer `0`. This fixed a UI bug where the Active Borrowings screen
+showed "Student #1" instead of "Alice Santos".
+
+---
+
+### Query 3: Count of active borrowings for a student
+
+**LINQ Query** (`EfBorrowingRepository.GetActiveBorrowingsCountByStudentIdAsync`)
+```csharp
+return await _context.Borrowings
+    .CountAsync(b => b.StudentId == studentId && b.Status == BorrowingStatus.Active, cancellationToken);
+```
+
+**Generated SQL**
+```sql
+SELECT COUNT(*)
+FROM "Borrowings" AS "b"
+WHERE "b"."StudentId" = @studentId AND "b"."Status" = 0
+```
+
+**Explanation**
+`CountAsync` becomes SQL's `COUNT(*)`. Only a single number is returned,
+not the actual rows, so the database does the counting instead of EF Core
+loading every borrowing into memory. This query enforces the rule that a
+student cannot have more than 3 active borrowings at once.
