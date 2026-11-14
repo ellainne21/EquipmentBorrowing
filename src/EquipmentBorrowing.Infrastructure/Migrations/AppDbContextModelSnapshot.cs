@@ -31,13 +31,16 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateBorrowed")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("date");
 
                     b.Property<int>("EquipmentId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("ExpectedReturnDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("ReturnedDate")
+                        .HasColumnType("date");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -47,11 +50,19 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EquipmentId");
+                    b.HasIndex("EquipmentId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Borrowings_OneActivePerEquipment")
+                        .HasFilter("\"Status\" = 0");
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Borrowings");
+                    b.ToTable("Borrowings", t =>
+                        {
+                            t.HasCheckConstraint("CK_Borrowings_ExpectedAfterCheckout", "\"ExpectedReturnDate\" > \"DateBorrowed\"");
+
+                            t.HasCheckConstraint("CK_Borrowings_ReturnNotBeforeCheckout", "\"ReturnedDate\" IS NULL OR \"ReturnedDate\" >= \"DateBorrowed\"");
+                        });
                 });
 
             modelBuilder.Entity("EquipmentBorrowing.Domain.Equipment", b =>
@@ -62,6 +73,20 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("IdentifierKey")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
@@ -71,6 +96,10 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdentifierKey")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Equipment_IdentifierKey");
 
                     b.ToTable("Equipment");
                 });
@@ -83,6 +112,10 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Contact")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<bool>("IsAllowedToBorrow")
                         .HasColumnType("boolean");
 
@@ -91,7 +124,21 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("StudentNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("StudentNumberKey")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("StudentNumberKey")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Students_StudentNumberKey");
 
                     b.ToTable("Students");
                 });

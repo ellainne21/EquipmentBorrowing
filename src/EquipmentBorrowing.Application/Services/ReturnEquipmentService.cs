@@ -34,7 +34,7 @@ public class ReturnEquipmentService
             return "Failure: Associated equipment not found.";
         }
 
-        borrowing.MarkAsReturned();
+        borrowing.MarkAsReturned(DateTime.Today); // BR-13: records the actual return date
         await _borrowingRepository.UpdateAsync(borrowing, cancellationToken);
 
         equipment.MarkAsReturned();
