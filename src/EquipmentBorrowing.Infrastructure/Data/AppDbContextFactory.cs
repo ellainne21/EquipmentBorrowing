@@ -1,28 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using System;
-using System.IO;
 
 namespace EquipmentBorrowing.Infrastructure.Data;
 
+// Used only by the dotnet ef tools (for example when creating a migration).
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
-    public static string GetDbPath()
-    {
-        var folder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "EquipmentBorrowing");
-
-        Directory.CreateDirectory(folder);
-
-        return Path.Combine(folder, "equipmentborrowing.db");
-    }
-
     public AppDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseSqlite($"Data Source={GetDbPath()}");
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseNpgsql(DatabaseSettings.GetConnectionString("Main"))
+            .Options;
 
-        return new AppDbContext(optionsBuilder.Options);
+        return new AppDbContext(options);
     }
 }

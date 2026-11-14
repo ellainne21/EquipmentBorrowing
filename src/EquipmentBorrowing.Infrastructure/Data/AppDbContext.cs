@@ -49,18 +49,19 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(b => b.Id);
 
+            // PostgreSQL: local date/time values need "timestamp without time zone"
             entity.Property(b => b.DateBorrowed)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("timestamp without time zone");
 
             entity.Property(b => b.ExpectedReturnDate)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("timestamp without time zone");
 
-            // Store the enum as its underlying int value in SQLite
             entity.Property(b => b.Status)
                 .IsRequired()
                 .HasConversion<int>();
 
-            // Foreign key relationships
             entity.HasOne<Student>()
                 .WithMany()
                 .HasForeignKey(b => b.StudentId)

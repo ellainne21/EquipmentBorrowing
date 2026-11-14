@@ -10,7 +10,6 @@ using EquipmentBorrowing.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.IO;
 
 namespace EquipmentBorrowing.Desktop;
 
@@ -29,7 +28,7 @@ public partial class App : Avalonia.Application
         ConfigureServices(services);
         Services = services.BuildServiceProvider();
 
-        // Apply migrations (creates/updates the SQLite database if needed)
+        // Apply migrations (creates/updates the PostgreSQL schema if needed)
         using (var context = Services.GetRequiredService<AppDbContext>())
         {
             DatabaseInitializer.Initialize(context);
@@ -47,19 +46,14 @@ public partial class App : Avalonia.Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
-        // Database: SQLite file in %LOCALAPPDATA%\EquipmentBorrowing
-        var dbPath = AppDbContextFactory.GetDbPath();
-        Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+        // PostgreSQL connection string comes from dotnet user-secrets (never from a file in Git)
+        var connectionString = DatabaseSettings.GetConnectionString("Main");
 
-        // Transient: every repository gets its own DbContext, so no old data is kept in memory
         services.AddDbContext<AppDbContext>(
-            options => options
-               .UseSqlite($"Data Source={dbPath}")
-               .LogTo(message => System.Diagnostics.Debug.WriteLine(message), Microsoft.Extensions.Logging.LogLevel.Information)
-               .EnableSensitiveDataLogging(),
+            options => options.UseNpgsql(connectionString),
             ServiceLifetime.Transient);
 
-        // Repositories (EF Core / SQLite)
+        // Repositories (EF Core / PostgreSQL)
         services.AddTransient<IStudentRepository, EfStudentRepository>();
         services.AddTransient<IEquipmentRepository, EfEquipmentRepository>();
         services.AddTransient<IBorrowingRepository, EfBorrowingRepository>();
