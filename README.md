@@ -207,6 +207,10 @@ The Domain and Application layers from Lab 1 didn't really change. We just added
 **6. If the in-memory repository were replaced by SQLite later, which parts of the current interface should remain largely unchanged?**
 - Everything except the Infrastructure layer would stay the same — the Domain classes, the Application services, and the whole Desktop project (Views and ViewModels) wouldn't need to change at all. We would only need to write new SQLite versions of the repositories and swap them in during setup.
 
+---
+
+---
+
 ## Laboratory Activity 3: Persistent Storage with SQLite and EF Core
 
 ### Part B: Database Design
