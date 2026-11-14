@@ -61,6 +61,11 @@ public partial class App : Avalonia.Application
         // Application services
         services.AddTransient<BorrowEquipmentService>();
         services.AddTransient<ReturnEquipmentService>();
+        services.AddTransient<RegisterStudentService>();
+        services.AddTransient<UpdateStudentService>();
+        services.AddTransient<ChangeStudentEligibilityService>();
+        services.AddTransient<RegisterEquipmentService>();
+        services.AddTransient<UpdateEquipmentService>();
 
         // ViewModels
         services.AddTransient<EquipmentViewModel>();
@@ -69,5 +74,6 @@ public partial class App : Avalonia.Application
 
         // Views
         services.AddTransient<MainWindow>();
+
     }
 }
