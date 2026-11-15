@@ -3,12 +3,12 @@
         xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="550"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
         x:Class="EquipmentBorrowing.Desktop.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="Campus Equipment Borrowing System"
-        Width="900" Height="550"
+        Width="1000" Height="650"
         Background="#FFF5F7">
 
 	<Design.DataContext>
@@ -33,6 +33,18 @@
                         Foreground="#831843" />
 				<Button Content="Active Borrowings"
                         Command="{Binding ShowBorrowingsCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        Background="#FBCFE8"
+                        Foreground="#831843" />
+				<Button Content="Students"
+                        Command="{Binding ShowStudentsCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        Background="#FBCFE8"
+                        Foreground="#831843" />
+				<Button Content="Manage Equipment"
+                        Command="{Binding ShowEquipmentManagementCommand}"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Left"
                         Background="#FBCFE8"

@@ -1,4 +1,4 @@
-﻿using EquipmentBorrowing.Application.Exceptions;
+using EquipmentBorrowing.Application.Exceptions;
 using EquipmentBorrowing.Application.Interfaces;
 using EquipmentBorrowing.Domain;
 using EquipmentBorrowing.Infrastructure.Data;
@@ -40,9 +40,14 @@ public class EfEquipmentRepository : IEquipmentRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Equipment>> SearchAsync(string? text, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Equipment>> SearchAsync(string? text, bool availableOnly = false, CancellationToken cancellationToken = default)
     {
         var query = _context.Equipment.AsNoTracking();
+
+        if (availableOnly)
+        {
+            query = query.Where(e => e.IsAvailable);
+        }
 
         var term = text?.Trim().ToLowerInvariant();
         if (!string.IsNullOrEmpty(term))
