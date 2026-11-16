@@ -7,6 +7,7 @@ using EquipmentBorrowing.Desktop.ViewModels;
 using EquipmentBorrowing.Desktop.Views;
 using EquipmentBorrowing.Infrastructure.Data;
 using EquipmentBorrowing.Infrastructure.Repositories;
+using EquipmentBorrowing.Infrastructure.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -16,6 +17,10 @@ namespace EquipmentBorrowing.Desktop;
 public partial class App : Avalonia.Application
 {
     public static IServiceProvider Services { get; private set; } = null!;
+
+    // Set EQUIPMENT_BORROWING_DB=Test to run against the disposable test database.
+    private static bool UseTestDatabase =>
+        string.Equals(Environment.GetEnvironmentVariable("EQUIPMENT_BORROWING_DB"), "Test", StringComparison.OrdinalIgnoreCase);
 
     public override void Initialize()
     {
@@ -38,6 +43,13 @@ public partial class App : Avalonia.Application
         {
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.DataContext = Services.GetRequiredService<MainViewModel>();
+
+            // Make it obvious which database is in use
+            if (UseTestDatabase)
+            {
+                mainWindow.Title = $"{mainWindow.Title}  [TEST DATABASE]";
+            }
+
             desktop.MainWindow = mainWindow;
         }
 
@@ -46,20 +58,29 @@ public partial class App : Avalonia.Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
-        // PostgreSQL connection string comes from dotnet user-secrets (never from a file in Git)
-        var connectionString = DatabaseSettings.GetConnectionString("Main");
+        // The connection string comes from dotnet user-secrets (never from a file in Git)
+        var connectionString = DatabaseSettings.GetConnectionString(UseTestDatabase ? "Test" : "Main");
 
-        services.AddDbContext<AppDbContext>(
-            options => options.UseNpgsql(connectionString),
-            ServiceLifetime.Transient);
+        // CONTEXT LIFETIME: contexts are short-lived and never shared between operations.
+        // - The factory creates one new context per borrow/return operation (unit of work).
+        // - Read-only screens use repositories that each get their own context (AsNoTracking reads).
+        services.AddDbContextFactory<AppDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddTransient<AppDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
         // Repositories (EF Core / PostgreSQL)
         services.AddTransient<IStudentRepository, EfStudentRepository>();
         services.AddTransient<IEquipmentRepository, EfEquipmentRepository>();
         services.AddTransient<IBorrowingRepository, EfBorrowingRepository>();
 
+        // TRANSACTION BOUNDARY: checkout and return run inside one unit of work (one transaction)
+        services.AddSingleton<IBorrowingUnitOfWorkFactory, EfBorrowingUnitOfWorkFactory>();
+        services.AddSingleton<ICheckoutFaultInjector>(_ => CreateFaultInjector());
+
         // Application services
+        services.AddTransient<CheckoutTransaction>();
         services.AddTransient<BorrowEquipmentService>();
+        services.AddTransient<CheckOutMultipleEquipmentService>();
         services.AddTransient<ReturnEquipmentService>();
         services.AddTransient<RegisterStudentService>();
         services.AddTransient<UpdateStudentService>();
@@ -68,6 +89,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<UpdateEquipmentService>();
         services.AddTransient<StudentQueryService>();
         services.AddTransient<EquipmentQueryService>();
+        services.AddTransient<BorrowingQueryService>();
 
         // ViewModels
         services.AddTransient<EquipmentViewModel>();
@@ -78,5 +100,23 @@ public partial class App : Avalonia.Application
 
         // Views
         services.AddTransient<MainWindow>();
+    }
+
+    // Test seams are honoured ONLY with the disposable test database, never with real data.
+    private static ICheckoutFaultInjector CreateFaultInjector()
+    {
+        if (!UseTestDatabase)
+        {
+            return new NoCheckoutFaults();
+        }
+
+        var mode = Environment.GetEnvironmentVariable("EQUIPMENT_BORROWING_FAULT")?.Trim().ToLowerInvariant();
+
+        return mode switch
+        {
+            "afterfirstwrite" => new FailAfterFirstWriteInjector(),
+            "lostcommit" => new LostCommitResponseInjector(),
+            _ => new NoCheckoutFaults()
+        };
     }
 }

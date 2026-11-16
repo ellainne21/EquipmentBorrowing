@@ -1,17 +1,18 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EquipmentBorrowing.Application.Interfaces;
 using EquipmentBorrowing.Application.Models;
 using EquipmentBorrowing.Application.Services;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
 
-public partial class BorrowingsViewModel : ViewModelBase
+public partial class BorrowingsViewModel : PageViewModelBase
 {
-    private readonly IBorrowingRepository _borrowingRepository;
-    private readonly ReturnEquipmentService _returnEquipmentService;
+    private readonly BorrowingQueryService _query;
+    private readonly ReturnEquipmentService _returnService;
+
+    private int _loadVersion;
 
     public ObservableCollection<ActiveBorrowingDetails> ActiveBorrowings { get; } = new();
 
@@ -19,46 +20,75 @@ public partial class BorrowingsViewModel : ViewModelBase
     public partial ActiveBorrowingDetails? SelectedBorrowing { get; set; }
 
     [ObservableProperty]
-    public partial string? StatusMessage { get; set; }
+    public partial bool IsEmpty { get; set; }
 
-    public BorrowingsViewModel(
-        IBorrowingRepository borrowingRepository,
-        ReturnEquipmentService returnEquipmentService)
+    public BorrowingsViewModel(BorrowingQueryService query, ReturnEquipmentService returnService)
     {
-        _borrowingRepository = borrowingRepository;
-        _returnEquipmentService = returnEquipmentService;
-
-        _ = LoadAsync();
+        _query = query;
+        _returnService = returnService;
     }
 
     // Parameterless constructor is only used by the XAML designer preview
     public BorrowingsViewModel()
     {
-        _borrowingRepository = null!;
-        _returnEquipmentService = null!;
+        _query = null!;
+        _returnService = null!;
     }
 
-    public async Task LoadAsync()
-    {
-        ActiveBorrowings.Clear();
-        foreach (var borrowing in await _borrowingRepository.GetActiveBorrowingsAsync())
-        {
-            ActiveBorrowings.Add(borrowing);
-        }
-    }
+    public Task LoadAsync() => ReloadAsync();
+
+    // Also used by the Retry button
+    [RelayCommand]
+    private Task RefreshAsync() => ReloadAsync();
 
     [RelayCommand]
     private async Task ReturnAsync()
     {
+        // Presentation check only
         if (SelectedBorrowing is null)
         {
             StatusMessage = "Please select a borrowing to return.";
             return;
         }
 
-        var result = await _returnEquipmentService.ExecuteAsync(SelectedBorrowing.BorrowingId);
-        StatusMessage = result;
+        var result = await _returnService.ExecuteAsync(SelectedBorrowing.BorrowingId);
+        StatusMessage = $"{result.Outcome}: {result.Message}";
 
-        await LoadAsync();
+        // Always refresh, so a stale or repeated return shows the real current list
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        var version = ++_loadVersion;
+        IsLoading = true;
+        LoadError = null;
+
+        try
+        {
+            var result = await _query.GetActiveAsync();
+
+            if (version != _loadVersion) return;
+
+            ActiveBorrowings.Clear();
+
+            if (!result.IsSuccess)
+            {
+                IsEmpty = false;
+                LoadError = result.ErrorMessage;
+                return;
+            }
+
+            foreach (var borrowing in result.Items)
+            {
+                ActiveBorrowings.Add(borrowing);
+            }
+
+            IsEmpty = ActiveBorrowings.Count == 0;
+        }
+        finally
+        {
+            if (version == _loadVersion) IsLoading = false;
+        }
     }
 }

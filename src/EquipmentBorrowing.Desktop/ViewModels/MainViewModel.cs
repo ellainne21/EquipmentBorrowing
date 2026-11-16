@@ -38,21 +38,21 @@ public partial class MainViewModel : ViewModelBase
     {
     }
 
+    // Every page switches first and then loads, so the user sees the loading state.
     [RelayCommand]
     private async Task ShowEquipment()
     {
-        await _equipmentViewModel.LoadAsync();
         CurrentPage = _equipmentViewModel;
+        await _equipmentViewModel.LoadAsync();
     }
 
     [RelayCommand]
     private async Task ShowBorrowings()
     {
-        await _borrowingsViewModel.LoadAsync();
         CurrentPage = _borrowingsViewModel;
+        await _borrowingsViewModel.LoadAsync();
     }
 
-    // New pages switch first and then load, so the user sees the loading state.
     [RelayCommand]
     private async Task ShowStudents()
     {

@@ -18,8 +18,10 @@ public class EfEquipmentRepository : IEquipmentRepository
 
     public async Task<Equipment?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        // Tracking stays ON: borrow/return services change this entity and save it.
+        // No tracking: this repository's context lives a long time, so it must not keep old copies.
+        // Borrow and return use the unit of work (a fresh tracked context per operation) instead.
         return await _context.Equipment
+            .AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 

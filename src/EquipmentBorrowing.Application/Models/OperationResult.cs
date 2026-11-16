@@ -1,10 +1,11 @@
-﻿namespace EquipmentBorrowing.Application.Models;
+namespace EquipmentBorrowing.Application.Models;
 
 public enum OperationOutcome
 {
     Success,   // the change was saved
     Rejected,  // a business rule or validation said no; nothing changed
-    Failed     // a database/technical problem; see message
+    Failed,    // a known database/technical problem; nothing was saved
+    Unknown    // the connection was lost while saving; it is NOT known whether the change was saved
 }
 
 public class OperationResult
@@ -34,4 +35,12 @@ public class OperationResult
     public static OperationResult DatabaseFailure() => Failed(
         "The database could not complete the request. Check the connection, " +
         "refresh the data to see its current state, then try again.");
+
+    // BR-18: the outcome of a commit is unknown. Do not claim success and do not claim rollback.
+    public static OperationResult UnknownOutcome() => new(
+        OperationOutcome.Unknown,
+        "The connection was lost while saving, so it is not known whether the change was saved. " +
+        "Nothing was retried automatically. Refresh the lists to see the current state " +
+        "before deciding what to do.",
+        null);
 }

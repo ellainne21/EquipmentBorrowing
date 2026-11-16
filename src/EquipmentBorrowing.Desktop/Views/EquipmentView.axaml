@@ -1,69 +1,97 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
-             xmlns:conv="using:EquipmentBorrowing.Desktop.Converters"
-             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="520"
              x:Class="EquipmentBorrowing.Desktop.Views.EquipmentView"
              x:DataType="vm:EquipmentViewModel">
 
-	<UserControl.Resources>
-		<conv:BoolToAvailabilityConverter x:Key="BoolToAvailabilityConverter" />
-	</UserControl.Resources>
-
-	<Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
+	<Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" RowSpacing="8">
 
 		<TextBlock Grid.Row="0" Text="Equipment"
-                   FontSize="20" FontWeight="Bold"
-                   Foreground="#831843"
-                   Margin="0,0,0,12" />
+                   FontSize="20" FontWeight="Bold" Foreground="#831843" />
 
-		<ListBox Grid.Row="1"
-                 Background="Transparent"
-                 ItemsSource="{Binding EquipmentList}"
-                 SelectedItem="{Binding SelectedEquipment}">
-			<ListBox.ItemTemplate>
-				<DataTemplate>
-					<Border Padding="10" Margin="0,2" Background="White"
-                            BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="6">
-						<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-							<TextBlock Grid.Column="0" Text="{Binding Id}" FontWeight="Bold" Width="40" Foreground="#831843" />
-							<TextBlock Grid.Column="1" Text="{Binding Name}" />
-							<TextBlock Grid.Column="2"
-                                       Text="{Binding IsAvailable, Converter={StaticResource BoolToAvailabilityConverter}}" />
-						</Grid>
-					</Border>
-				</DataTemplate>
-			</ListBox.ItemTemplate>
-		</ListBox>
+		<Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+			<TextBox Grid.Column="0" Text="{Binding SearchText}">
+				<TextBox.KeyBindings>
+					<KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+				</TextBox.KeyBindings>
+			</TextBox>
+			<Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
+                    Background="#F472B6" Foreground="White" />
+			<Button Grid.Column="2" Content="Clear" Command="{Binding ClearSearchCommand}"
+                    Background="#FBCFE8" Foreground="#831843" />
+		</Grid>
 
-		<Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="#FDF2F8" BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="8">
+		<CheckBox Grid.Row="2" Content="Show available equipment only"
+                  IsChecked="{Binding AvailableOnly}" />
+
+		<StackPanel Grid.Row="3" Spacing="4" IsVisible="{Binding IsLoading}">
+			<TextBlock Text="Loading equipment..." Foreground="#831843" />
+			<ProgressBar IsIndeterminate="True" />
+		</StackPanel>
+
+		<Grid Grid.Row="4">
+			<ScrollViewer>
+				<ItemsControl ItemsSource="{Binding EquipmentList}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate x:DataType="vm:EquipmentChoice">
+							<Border Padding="10" Margin="0,2" Background="White"
+                                    BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="6">
+								<Grid ColumnDefinitions="Auto,90,*,Auto" ColumnSpacing="12">
+									<CheckBox Grid.Column="0" IsChecked="{Binding IsChecked}" />
+									<TextBlock Grid.Column="1" Text="{Binding Identifier}"
+                                               FontWeight="Bold" Foreground="#831843"
+                                               VerticalAlignment="Center" />
+									<StackPanel Grid.Column="2" VerticalAlignment="Center">
+										<TextBlock Text="{Binding Name}" />
+										<TextBlock Text="{Binding DescriptionText}" FontSize="12" Foreground="#6B7280" />
+									</StackPanel>
+									<TextBlock Grid.Column="3" Text="{Binding AvailabilityText}"
+                                               VerticalAlignment="Center" />
+								</Grid>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+
+			<!-- Empty state: the query worked but returned no rows -->
+			<TextBlock Text="{Binding EmptyMessage}" IsVisible="{Binding IsEmpty}"
+                       Foreground="#831843" TextWrapping="Wrap"
+                       VerticalAlignment="Top" Margin="4" />
+
+			<!-- Error state: the database could not be reached -->
+			<StackPanel IsVisible="{Binding HasLoadError}" Spacing="8" VerticalAlignment="Top" Margin="4">
+				<TextBlock Text="{Binding LoadError}" Foreground="#B91C1C" TextWrapping="Wrap" />
+				<Button Content="Retry" Command="{Binding SearchCommand}"
+                        Background="#F472B6" Foreground="White" />
+			</StackPanel>
+		</Grid>
+
+		<Border Grid.Row="5" Padding="12" Background="#FDF2F8" BorderBrush="#FBCFE8"
+                BorderThickness="1" CornerRadius="8">
 			<StackPanel Spacing="8">
-				<TextBlock Text="Borrow Equipment" FontWeight="Bold" Foreground="#831843" />
+				<TextBlock Text="Check out the ticked items" FontWeight="Bold" Foreground="#831843" />
 
 				<ComboBox ItemsSource="{Binding Students}"
                           SelectedItem="{Binding SelectedStudent}"
                           PlaceholderText="Select student"
                           HorizontalAlignment="Stretch">
 					<ComboBox.ItemTemplate>
-						<DataTemplate>
-							<TextBlock Text="{Binding Name}" />
+						<DataTemplate x:DataType="vm:StudentChoice">
+							<TextBlock Text="{Binding Label}" />
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
 
 				<DatePicker SelectedDate="{Binding ExpectedReturnDate}" />
 
-				<Button Content="Borrow Equipment"
-                        Command="{Binding BorrowCommand}"
-                        HorizontalAlignment="Left"
-                        Background="#F472B6"
-                        Foreground="White" />
+				<Button Content="Check out ticked items" Command="{Binding CheckOutCommand}"
+                        HorizontalAlignment="Left" Background="#F472B6" Foreground="White" />
 
-				<TextBlock Text="{Binding StatusMessage}"
-                           Foreground="#BE185D"
-                           TextWrapping="Wrap" />
+				<TextBlock Text="{Binding StatusMessage}" Foreground="#BE185D" TextWrapping="Wrap" />
 			</StackPanel>
 		</Border>
 	</Grid>
