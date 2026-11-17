@@ -7,18 +7,32 @@
              x:Class="EquipmentBorrowing.Desktop.Views.BorrowingsView"
              x:DataType="vm:BorrowingsViewModel">
 
-	<Grid RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="*" RowSpacing="8">
+	<Grid RowDefinitions="Auto,Auto,Auto,*,Auto" ColumnDefinitions="*" RowSpacing="8">
 
 		<TextBlock Grid.Row="0" Text="Active Borrowings"
                    FontSize="20" FontWeight="Bold"
                    Foreground="#831843" />
 
-		<StackPanel Grid.Row="1" Spacing="4" IsVisible="{Binding IsLoading}">
+		<!-- Search bar: student name, student number or equipment name -->
+		<Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+			<TextBox Grid.Column="0" Text="{Binding SearchText}"
+                     PlaceholderText="Search by student name, student number or equipment name">
+				<TextBox.KeyBindings>
+					<KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+				</TextBox.KeyBindings>
+			</TextBox>
+			<Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
+                    Background="#F472B6" Foreground="White" />
+			<Button Grid.Column="2" Content="Clear" Command="{Binding ClearSearchCommand}"
+                    Background="#FBCFE8" Foreground="#831843" />
+		</Grid>
+
+		<StackPanel Grid.Row="2" Spacing="4" IsVisible="{Binding IsLoading}">
 			<TextBlock Text="Loading active borrowings..." Foreground="#831843" />
 			<ProgressBar IsIndeterminate="True" />
 		</StackPanel>
 
-		<Grid Grid.Row="2">
+		<Grid Grid.Row="3">
 			<ListBox Background="Transparent"
                      ItemsSource="{Binding ActiveBorrowings}"
                      SelectedItem="{Binding SelectedBorrowing}">
@@ -26,19 +40,21 @@
 					<DataTemplate>
 						<Border Padding="10" Margin="0,2" Background="White"
                                 BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="6">
-							<Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
-								<TextBlock Grid.Column="0" Text="{Binding BorrowingId}" FontWeight="Bold" Width="50" Foreground="#831843" />
-								<TextBlock Grid.Column="1" Text="{Binding StudentName}" />
-								<TextBlock Grid.Column="2" Text="{Binding EquipmentName}" />
-								<TextBlock Grid.Column="3" Text="{Binding ExpectedReturnDate, StringFormat='Due {0:MM/dd/yyyy}'}" />
+							<Grid ColumnDefinitions="40,100,*,80,*,Auto" ColumnSpacing="12">
+								<TextBlock Grid.Column="0" Text="{Binding BorrowingId}" FontWeight="Bold" Foreground="#831843" />
+								<TextBlock Grid.Column="1" Text="{Binding StudentNumber}" FontWeight="Bold" Foreground="#831843" />
+								<TextBlock Grid.Column="2" Text="{Binding StudentName}" />
+								<TextBlock Grid.Column="3" Text="{Binding EquipmentIdentifier}" FontWeight="Bold" Foreground="#831843" />
+								<TextBlock Grid.Column="4" Text="{Binding EquipmentName}" />
+								<TextBlock Grid.Column="5" Text="{Binding ExpectedReturnDate, StringFormat='Due {0:MM/dd/yyyy}'}" />
 							</Grid>
 						</Border>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
 
-			<!-- Empty state -->
-			<TextBlock Text="There are no active borrowings." IsVisible="{Binding IsEmpty}"
+			<!-- Empty state (no records, or no search matches) -->
+			<TextBlock Text="{Binding EmptyMessage}" IsVisible="{Binding IsEmpty}"
                        Foreground="#831843" VerticalAlignment="Top" Margin="4" />
 
 			<!-- Error state -->
@@ -49,7 +65,7 @@
 			</StackPanel>
 		</Grid>
 
-		<Border Grid.Row="3" Padding="12" Background="#FDF2F8" BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="8">
+		<Border Grid.Row="4" Padding="12" Background="#FDF2F8" BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="8">
 			<StackPanel Spacing="8">
 				<Button Content="Return Equipment"
                         Command="{Binding ReturnCommand}"

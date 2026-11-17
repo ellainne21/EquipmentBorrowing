@@ -19,8 +19,15 @@ public partial class BorrowingsViewModel : PageViewModelBase
     [ObservableProperty]
     public partial ActiveBorrowingDetails? SelectedBorrowing { get; set; }
 
+    // Search text typed by the staff member (BR-17). The database does the filtering.
+    [ObservableProperty]
+    public partial string? SearchText { get; set; }
+
     [ObservableProperty]
     public partial bool IsEmpty { get; set; }
+
+    [ObservableProperty]
+    public partial string? EmptyMessage { get; set; }
 
     public BorrowingsViewModel(BorrowingQueryService query, ReturnEquipmentService returnService)
     {
@@ -40,6 +47,16 @@ public partial class BorrowingsViewModel : PageViewModelBase
     // Also used by the Retry button
     [RelayCommand]
     private Task RefreshAsync() => ReloadAsync();
+
+    [RelayCommand]
+    private Task SearchAsync() => ReloadAsync();
+
+    [RelayCommand]
+    private Task ClearSearchAsync()
+    {
+        SearchText = null;
+        return ReloadAsync();
+    }
 
     [RelayCommand]
     private async Task ReturnAsync()
@@ -66,8 +83,9 @@ public partial class BorrowingsViewModel : PageViewModelBase
 
         try
         {
-            var result = await _query.GetActiveAsync();
+            var result = await _query.GetActiveAsync(SearchText);
 
+            // A newer load has started; drop this old result
             if (version != _loadVersion) return;
 
             ActiveBorrowings.Clear();
@@ -84,7 +102,11 @@ public partial class BorrowingsViewModel : PageViewModelBase
                 ActiveBorrowings.Add(borrowing);
             }
 
+            // "No matches" is an empty state, not an error (BR-17)
             IsEmpty = ActiveBorrowings.Count == 0;
+            EmptyMessage = string.IsNullOrWhiteSpace(SearchText)
+                ? "There are no active borrowings."
+                : "No active borrowings match your search.";
         }
         finally
         {

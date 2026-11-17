@@ -3,7 +3,6 @@ using EquipmentBorrowing.Application.Models;
 
 namespace EquipmentBorrowing.Application.Services;
 
-// Read-only lookup of borrowings for the Active Borrowings screen (UC-04).
 public class BorrowingQueryService
 {
     private readonly IBorrowingRepository _borrowings;
@@ -13,18 +12,13 @@ public class BorrowingQueryService
         _borrowings = borrowings;
     }
 
-    public async Task<QueryResult<ActiveBorrowingDetails>> GetActiveAsync(CancellationToken cancellationToken = default)
+    public async Task<QueryResult<ActiveBorrowingDetails>> GetActiveAsync(string? searchText, CancellationToken cancellationToken = default)
     {
         try
         {
-            var items = await _borrowings.GetActiveBorrowingsAsync(cancellationToken);
-
-            // Stable order: earliest due first, borrowing id as the tie-breaker
-            var sorted = items
-                .OrderBy(b => b.ExpectedReturnDate)
-                .ThenBy(b => b.BorrowingId);
-
-            return QueryResult<ActiveBorrowingDetails>.Success(sorted);
+            // Filtering and sorting are now done in the database by the repository
+            var items = await _borrowings.GetActiveBorrowingsAsync(searchText, cancellationToken);
+            return QueryResult<ActiveBorrowingDetails>.Success(items);
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception)
