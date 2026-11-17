@@ -693,3 +693,209 @@ AppDbContext → SQLite database
   reflection questions: because every layer only depends on interfaces
   from the layer below it, the real database technology can change
   without forcing changes anywhere else in the application.
+
+
+  
+---
+
+## Laboratory Activity 4: PostgreSQL, Multi-Item Checkout and Histories
+
+**Pair:** Ellainne G. Cabasag ([student ID]) and Floramay S. Balofinos ([student ID])
+
+Lab 4 continues the same application. Lab 3 stored data in SQLite. Lab 4 replaces SQLite with
+PostgreSQL, adds a transactional multi-item checkout, histories, search and student/equipment
+management. The sections above describe Labs 1 to 3 and are kept as they were. Where the Lab 3
+text says SQLite, that is correct for Lab 3. From Lab 4 on, the application uses PostgreSQL.
+
+### 1. Scope: the 14 required use cases
+
+All users are Laboratory Staff / Equipment Custodian (the primary actor). The supporting system is PostgreSQL.
+
+| Use case | Where in the application |
+|---|---|
+| UC-01 View Equipment Catalog | **Equipment** page |
+| UC-02 Find Available Equipment | **Equipment** page: search box and "Show available equipment only" |
+| UC-03 Borrow Equipment | **Equipment** page: tick one item, choose student and return date |
+| UC-04 View Active Borrowings | **Active Borrowings** page (with search) |
+| UC-05 Return Equipment | **Active Borrowings** page: select a row, "Return Equipment" |
+| UC-06 Check Out Multiple Equipment Items | **Equipment** page: tick two or three items (all-or-nothing) |
+| UC-07 View Student Borrowing History | **Student History** page |
+| UC-08 View Equipment Borrowing History | **Equipment History** page |
+| UC-09 Search, Filter, and Sort Borrowings | **Borrowing Search** page |
+| UC-12 Register Student | **Students** page |
+| UC-13 Update Student Information | **Students** page |
+| UC-14 Change Student Borrowing Eligibility | **Students** page: Permit / Restrict |
+| UC-15 Register Equipment | **Manage Equipment** page |
+| UC-16 Update Equipment Information | **Manage Equipment** page |
+
+The use-case diagram, catalog, adapted suite and traceability matrix are in `docs/`:
+`Use-Case-Diagram-Lab4.png`, `Lab4_Use_Case_Catalog_and_Diagram.docx`, `Lab4_Use_Case_Suite.docx`
+and `Lab4_Traceability_Matrix.docx`. Test evidence is in `docs/evidence/`.
+
+### 2. Prerequisites
+
+- Windows with the **.NET 10 SDK**
+- **PostgreSQL 18** and **pgAdmin 4**
+- **Git**
+- **Visual Studio 2026** (Community) or **VS Code** with the C# Dev Kit
+- The EF Core command-line tool: `dotnet tool install --global dotnet-ef`
+
+### 3. Installation and secret-free configuration
+
+1. Clone the repository and open the folder:
+
+   ```powershell
+   git clone https://github.com/Ellainne21/EquipmentBorrowing.git
+   cd EquipmentBorrowing
+   ```
+
+2. In pgAdmin (or `psql`) create two **empty** databases:
+
+   ```sql
+   CREATE DATABASE "Equipment_BorrowingDB";   -- main database
+   CREATE DATABASE equipmentborrowing_test;   -- disposable database for failure and rollback tests
+   ```
+
+3. Store the connection strings with **dotnet user-secrets**. They are saved outside the repository
+   (under `%APPDATA%\Microsoft\UserSecrets\`), so **no password is ever committed to Git**.
+   Replace `<your-password>` with your own PostgreSQL password:
+
+   ```powershell
+   dotnet user-secrets set "ConnectionStrings:Main" "Host=localhost;Port=5432;Database=Equipment_BorrowingDB;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Desktop
+   dotnet user-secrets set "ConnectionStrings:Test" "Host=localhost;Port=5432;Database=equipmentborrowing_test;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Desktop
+   ```
+
+   `DatabaseSettings` reads these keys. If one is missing, the application stops and prints the exact command to set it.
+
+### 4. Migrations and initial data
+
+The schema is created by two EF Core migrations in `src/EquipmentBorrowing.Infrastructure/Migrations`:
+
+- `InitialPostgres`: tables, primary keys and foreign keys
+- `AddIdentifiersReturnDateAndConstraints`: normalized identifier keys, the return date, unique indexes and check constraints
+
+They are applied **automatically at startup** by `DatabaseInitializer` (called from the composition root `App.axaml.cs`, never from a View or ViewModel).
+That is how a clean database, including the test database, gets its schema and initial data: just start the application against it.
+
+The `dotnet ef` tool can also be used. **It always targets the MAIN database** (the design-time factory reads `ConnectionStrings:Main`):
+
+```powershell
+dotnet ef migrations list --project src/EquipmentBorrowing.Infrastructure                # shows which migrations are applied
+dotnet ef database update --project src/EquipmentBorrowing.Infrastructure                # applies pending migrations to the main database
+dotnet ef database drop --force --project src/EquipmentBorrowing.Infrastructure          # DELETES the main database (close pgAdmin connections first)
+```
+
+To start again with a clean **test** database, drop and recreate it in pgAdmin (connected to the `postgres` database), then run the application in test mode:
+
+```sql
+DROP DATABASE equipmentborrowing_test WITH (FORCE);
+CREATE DATABASE equipmentborrowing_test;
+```
+
+**Initial data** is added only when the database is completely empty. It never overwrites existing data:
+
+| Students | Equipment | Borrowings |
+|---|---|---|
+| 2026-0001 Alice Santos (eligible) | LAP-001 Laptop Dell XPS 15 | Alice returned LAP-001 |
+| 2026-0002 Bob Reyes (**restricted**) | PRJ-001 Projector Epson | Bob returned ARD-001 |
+| 2026-0003 Carla Mendoza (no history) | ARD-001 Arduino Kit | Alice has CAM-001 **active** (so CAM-001 is unavailable) |
+| 2026-0004 Daniel Cruz (no history) | CAM-001 Canon Camera, MIC-001 USB Microphone (no history) | |
+
+**Database integrity (BR-16)** is enforced by PostgreSQL itself, not only by the application:
+
+| Rule | Database object |
+|---|---|
+| Unique student number, ignoring case and spaces | unique index `UX_Students_StudentNumberKey` |
+| Unique equipment identifier, ignoring case and spaces | unique index `UX_Equipment_IdentifierKey` |
+| An item has at most one active borrowing | partial unique index `UX_Borrowings_OneActivePerEquipment` (`WHERE "Status" = 0`) |
+| Due date after checkout date | check constraint `CK_Borrowings_ExpectedAfterCheckout` |
+| Return date not before checkout date | check constraint `CK_Borrowings_ReturnNotBeforeCheckout` |
+| Every borrowing has a real student and a real item | foreign keys, `ON DELETE RESTRICT` |
+
+The "key" columns hold the trimmed, upper-case text. The application uses the same normalization, so the application check and the database index always agree.
+
+### 5. Running the application and the tests
+
+```powershell
+dotnet run --project src/EquipmentBorrowing.Desktop     # main database
+dotnet test                                             # 51 automated tests, no database needed
+```
+
+To use the **disposable test database**, set an environment variable first. The window title then shows **[TEST DATABASE]**:
+
+```powershell
+$env:EQUIPMENT_BORROWING_DB="Test"
+dotnet run --project src/EquipmentBorrowing.Desktop
+```
+
+`.vscode/launch.json` contains the same choices for F5 in VS Code.
+
+**Controlled failure seams.** They work **only** with the test database and are used to demonstrate rollback and the unknown-outcome rule:
+
+| Variable | Effect |
+|---|---|
+| `EQUIPMENT_BORROWING_FAULT=AfterFirstWrite` | The checkout fails after the first item was written, before the commit (tests atomic rollback) |
+| `EQUIPMENT_BORROWING_FAULT=LostCommit` | The connection is "lost" after PostgreSQL accepted the commit (tests the unknown-outcome message) |
+
+### 6. Architecture
+
+```
+Avalonia View  ->  ViewModel  ->  Application Service  ->  Repository abstraction  ->  EF Core Infrastructure  ->  PostgreSQL
+```
+
+| Project | Responsibility | References |
+|---|---|---|
+| `EquipmentBorrowing.Domain` | Student, Equipment, Borrowing and their own rules (normalization, return rules) | nothing |
+| `EquipmentBorrowing.Application` | Services, repository and unit-of-work **interfaces**, result types | Domain |
+| `EquipmentBorrowing.Infrastructure` | EF Core `AppDbContext`, mappings, migrations, repositories, unit of work | Application, Domain |
+| `EquipmentBorrowing.Desktop` | Avalonia Views, ViewModels, dependency injection (composition root) | Application, Infrastructure |
+| `EquipmentBorrowing.Tests` | xUnit tests with a fake in-memory unit of work | Application, Domain |
+
+Views and ViewModels never run SQL, never create a `DbContext` and never run migrations. They call Application services and show the result.
+Domain and Application never reference Avalonia or EF Core.
+
+Services return a result instead of throwing for expected problems. `OperationResult` has four outcomes: **Success**, **Rejected** (a business rule said no), **Failed** (a known failure, nothing was changed) and **Unknown** (the commit outcome cannot be known). `QueryResult` separates "found", "no matches" and "database problem", so the screens can show an empty state or an error state, never the wrong one (BR-19).
+
+### 7. DbContext and dependency-injection lifetimes
+
+Decision: **short-lived contexts, never shared between operations.**
+
+| Piece | Lifetime | Why |
+|---|---|---|
+| `AppDbContext` factory (`AddDbContextFactory`) | singleton | Creates a new context whenever one is needed. A desktop window stays open for hours, so one shared context would keep old tracked data. |
+| Checkout and return | **one new context and one transaction per operation** (`EfBorrowingUnitOfWork`) | The operation re-reads current data inside its own transaction, so it cannot use stale data. |
+| Read-only repositories | transient, every query uses `AsNoTracking()` | Nothing is cached, so lists always show what is in the database. |
+| Student and equipment edits | transient repository; the edit **attaches** the object and marks only the edited columns as changed | A stale edit screen cannot overwrite eligibility or availability. |
+| ViewModels and services | transient | They hold screen state only. No database state lives in them. |
+
+Reason for the decision: with the long-lived tracked context of Lab 3, the equipment list could show **stale availability after a return**. Fresh contexts and no-tracking reads removed that problem.
+
+### 8. Transaction decisions (checkout and return)
+
+The transaction boundary is the **application service**, through `IBorrowingUnitOfWork`. The service decides what must succeed together. Infrastructure only provides the transaction.
+
+1. Begin a transaction on a **new context**.
+2. Lock the student row and the requested equipment rows (`SELECT ... FOR UPDATE`), so two staff members cannot take the same item at the same time.
+3. **Revalidate everything inside the transaction** (BR-15): the student exists and is eligible, every item exists, no item has an active borrowing and is available, and the student's active count plus the new items stays at 3 or less. Items must be distinct and there must be at least two for a multi-item checkout.
+4. Write all borrowings and all availability changes, then **commit once**. Everything is saved, or nothing is.
+5. The partial unique index is the last line of defense. If two requests still collide, PostgreSQL rejects the second write and the application reports a conflict (`ConflictException` becomes **Rejected**) instead of creating a duplicate.
+6. A known failed write rolls back and reports **Failed**. It never reports success.
+7. **Unknown outcome (BR-18):** if the connection is lost while committing, the service reports **Unknown**. It does **not** retry automatically and does **not** claim a rollback. The screen refreshes so the staff member can see the real state before deciding.
+
+Returning equipment uses the same boundary: the borrowing and the equipment change together. A repeated or stale return is rejected, and history is never deleted (BR-14).
+
+### 9. Responsive loading
+
+Lists and histories load asynchronously (`async`/`await`) with a loading indicator, an empty state and an error state with **Retry**.
+Each page counts its loads. If a slow old load finishes after a newer one, its result is ignored, so the screen never shows outdated data.
+Search, filter and sort (BR-17) run **in PostgreSQL**, not in memory. The borrowing id is the tie-breaker, so the order is always stable.
+
+### 10. Verification
+
+- **Automated tests:** `dotnet test` runs 51 tests on the real services with a fake in-memory unit of work. They cover the checkout rules (including exactly at the limit, duplicates, fewer than two), rollback after a failed write, the unknown outcome, returns and the domain rules.
+- **Manual and database evidence:** `docs/evidence/` holds screenshots with a fresh database readback for each scenario, including restart checks.
+- **Traceability:** `docs/Lab4_Traceability_Matrix.docx` connects each of the 14 use cases to the implementation, the business rules and the evidence (acceptance checks A01 to A19).
+
+### 11. Git history
+
+Earlier work is preserved. Lab 4 was developed in small commits: the PostgreSQL switch, the domain and database rules, transactional checkout and return, each page, the tests and the documents. Use `git log --oneline` to see it.
