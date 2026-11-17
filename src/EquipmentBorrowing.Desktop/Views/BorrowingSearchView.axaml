@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="520"
+             x:Class="EquipmentBorrowing.Desktop.Views.BorrowingSearchView"
+             x:DataType="vm:BorrowingSearchViewModel">
+
+	<Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="8">
+
+		<TextBlock Grid.Row="0" Text="Borrowing Search"
+                   FontSize="20" FontWeight="Bold" Foreground="#831843" />
+
+		<!-- Search text: student name, student number or equipment name -->
+		<Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+			<TextBox Grid.Column="0" Text="{Binding SearchText}"
+                     PlaceholderText="Search by student name, student number or equipment name">
+				<TextBox.KeyBindings>
+					<KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+				</TextBox.KeyBindings>
+			</TextBox>
+			<Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
+                    Background="#F472B6" Foreground="White" />
+			<Button Grid.Column="2" Content="Clear" Command="{Binding ClearCommand}"
+                    Background="#FBCFE8" Foreground="#831843" />
+		</Grid>
+
+		<!-- Status filter and sort choices -->
+		<StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="16">
+			<StackPanel Spacing="2">
+				<TextBlock Text="Status" FontSize="12" Foreground="#831843" />
+				<ComboBox Width="140" SelectedIndex="{Binding SelectedStatusIndex}">
+					<ComboBoxItem Content="All" />
+					<ComboBoxItem Content="Active" />
+					<ComboBoxItem Content="Returned" />
+				</ComboBox>
+			</StackPanel>
+			<StackPanel Spacing="2">
+				<TextBlock Text="Sort by" FontSize="12" Foreground="#831843" />
+				<ComboBox Width="190" SelectedIndex="{Binding SelectedSortIndex}">
+					<ComboBoxItem Content="Checkout date" />
+					<ComboBoxItem Content="Expected return date" />
+				</ComboBox>
+			</StackPanel>
+			<StackPanel Spacing="2">
+				<TextBlock Text="Direction" FontSize="12" Foreground="#831843" />
+				<ComboBox Width="150" SelectedIndex="{Binding SelectedDirectionIndex}">
+					<ComboBoxItem Content="Ascending" />
+					<ComboBoxItem Content="Descending" />
+				</ComboBox>
+			</StackPanel>
+		</StackPanel>
+
+		<!-- Loading state -->
+		<StackPanel Grid.Row="3" Spacing="4" IsVisible="{Binding IsLoading}">
+			<TextBlock Text="Loading borrowing records..." Foreground="#831843" />
+			<ProgressBar IsIndeterminate="True" />
+		</StackPanel>
+
+		<!-- Column headings -->
+		<Grid Grid.Row="4" RowDefinitions="Auto,Auto" RowSpacing="2">
+			<TextBlock Grid.Row="0" Text="{Binding ResultCountText}" Foreground="#BE185D" FontSize="12" />
+			<Border Grid.Row="1" Padding="10,0" Margin="0,2">
+				<Grid ColumnDefinitions="40,*,*,95,95,95,75" ColumnSpacing="12">
+					<TextBlock Grid.Column="0" Text="Id" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="1" Text="Student" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="2" Text="Equipment" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="3" Text="Checked out" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="4" Text="Due" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="5" Text="Returned" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="6" Text="Status" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+				</Grid>
+			</Border>
+		</Grid>
+
+		<Grid Grid.Row="5">
+			<ScrollViewer>
+				<ItemsControl ItemsSource="{Binding Rows}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate x:DataType="vm:BorrowingRow">
+							<Border Padding="10" Margin="0,2" Background="White"
+                                    BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="6">
+								<Grid ColumnDefinitions="40,*,*,95,95,95,75" ColumnSpacing="12">
+									<TextBlock Grid.Column="0" Text="{Binding BorrowingId}" FontWeight="Bold" Foreground="#831843" />
+									<StackPanel Grid.Column="1">
+										<TextBlock Text="{Binding StudentNumber}" FontWeight="Bold" Foreground="#831843" />
+										<TextBlock Text="{Binding StudentName}" />
+									</StackPanel>
+									<StackPanel Grid.Column="2">
+										<TextBlock Text="{Binding EquipmentIdentifier}" FontWeight="Bold" Foreground="#831843" />
+										<TextBlock Text="{Binding EquipmentName}" />
+									</StackPanel>
+									<TextBlock Grid.Column="3" Text="{Binding CheckedOut}" />
+									<TextBlock Grid.Column="4" Text="{Binding Due}" />
+									<TextBlock Grid.Column="5" Text="{Binding Returned}" />
+									<TextBlock Grid.Column="6" Text="{Binding Status}" FontWeight="SemiBold" />
+								</Grid>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+
+			<!-- Empty state (no records, or no matches) -->
+			<TextBlock Text="{Binding EmptyMessage}" IsVisible="{Binding IsEmpty}"
+                       Foreground="#831843" VerticalAlignment="Top" Margin="4" />
+
+			<!-- Error state -->
+			<StackPanel IsVisible="{Binding HasLoadError}" Spacing="8" VerticalAlignment="Top" Margin="4">
+				<TextBlock Text="{Binding LoadError}" Foreground="#B91C1C" TextWrapping="Wrap" />
+				<Button Content="Retry" Command="{Binding RefreshCommand}"
+                        Background="#F472B6" Foreground="White" />
+			</StackPanel>
+		</Grid>
+	</Grid>
+</UserControl>

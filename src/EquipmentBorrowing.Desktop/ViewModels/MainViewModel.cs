@@ -8,6 +8,7 @@ public partial class MainViewModel : ViewModelBase
 {
     private readonly EquipmentViewModel _equipmentViewModel;
     private readonly BorrowingsViewModel _borrowingsViewModel;
+    private readonly BorrowingSearchViewModel _borrowingSearchViewModel;
     private readonly StudentsViewModel _studentsViewModel;
     private readonly EquipmentManagementViewModel _equipmentManagementViewModel;
 
@@ -17,11 +18,13 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel(
         EquipmentViewModel equipmentViewModel,
         BorrowingsViewModel borrowingsViewModel,
+        BorrowingSearchViewModel borrowingSearchViewModel,
         StudentsViewModel studentsViewModel,
         EquipmentManagementViewModel equipmentManagementViewModel)
     {
         _equipmentViewModel = equipmentViewModel;
         _borrowingsViewModel = borrowingsViewModel;
+        _borrowingSearchViewModel = borrowingSearchViewModel;
         _studentsViewModel = studentsViewModel;
         _equipmentManagementViewModel = equipmentManagementViewModel;
 
@@ -33,6 +36,7 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel() : this(
         new EquipmentViewModel(),
         new BorrowingsViewModel(),
+        new BorrowingSearchViewModel(),
         new StudentsViewModel(),
         new EquipmentManagementViewModel())
     {
@@ -51,6 +55,13 @@ public partial class MainViewModel : ViewModelBase
     {
         CurrentPage = _borrowingsViewModel;
         await _borrowingsViewModel.LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task ShowBorrowingSearch()
+    {
+        CurrentPage = _borrowingSearchViewModel;
+        await _borrowingSearchViewModel.LoadAsync();
     }
 
     [RelayCommand]

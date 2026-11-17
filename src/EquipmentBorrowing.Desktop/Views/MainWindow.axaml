@@ -37,6 +37,12 @@
                         HorizontalContentAlignment="Left"
                         Background="#FBCFE8"
                         Foreground="#831843" />
+				<Button Content="Borrowing Search"
+                        Command="{Binding ShowBorrowingSearchCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        Background="#FBCFE8"
+                        Foreground="#831843" />
 				<Button Content="Students"
                         Command="{Binding ShowStudentsCommand}"
                         HorizontalAlignment="Stretch"
