@@ -159,3 +159,6 @@ public class EfBorrowingRepository : IBorrowingRepository
         return await ordered.ToListAsync(cancellationToken);
     }
 }
+
+//$env:EQUIPMENT_BORROWING_DB="Test"
+//dotnet run --project src/EquipmentBorrowing.Desktop
