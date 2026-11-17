@@ -3,7 +3,8 @@ using EquipmentBorrowing.Application.Models;
 
 namespace EquipmentBorrowing.Application.Services;
 
-// Read-only lookups of borrowings: the active list (UC-04) and the search, filter and sort page (UC-09).
+// Read-only lookups of borrowings: the active list (UC-04), the histories (UC-07, UC-08)
+// and the search, filter and sort page (UC-09).
 // It tells "found", "no matches" and "database problem" apart (BR-19).
 public class BorrowingQueryService
 {
@@ -42,6 +43,54 @@ public class BorrowingQueryService
         {
             return QueryResult<BorrowingRecord>.Failure(
                 "Could not load borrowing records from the database. Check the connection and try again.");
+        }
+    }
+
+    // UC-07
+    public async Task<QueryResult<BorrowingRecord>> GetStudentHistoryAsync(int studentId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var history = await _borrowings.GetStudentHistoryAsync(studentId, cancellationToken);
+
+            // A stale selection: the student is gone. Explain it and let the user choose again (UC-07 2e).
+            if (!history.SubjectFound)
+            {
+                return QueryResult<BorrowingRecord>.Failure(
+                    "The selected student could not be found. Please select a student again.");
+            }
+
+            return QueryResult<BorrowingRecord>.Success(history.Records);
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception)
+        {
+            return QueryResult<BorrowingRecord>.Failure(
+                "Could not load the student's borrowing history from the database. Check the connection and try again.");
+        }
+    }
+
+    // UC-08
+    public async Task<QueryResult<BorrowingRecord>> GetEquipmentHistoryAsync(int equipmentId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var history = await _borrowings.GetEquipmentHistoryAsync(equipmentId, cancellationToken);
+
+            // A stale selection: the item is gone. Explain it and let the user choose again (UC-08 2e).
+            if (!history.SubjectFound)
+            {
+                return QueryResult<BorrowingRecord>.Failure(
+                    "The selected equipment could not be found. Please select an item again.");
+            }
+
+            return QueryResult<BorrowingRecord>.Success(history.Records);
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception)
+        {
+            return QueryResult<BorrowingRecord>.Failure(
+                "Could not load the equipment's borrowing history from the database. Check the connection and try again.");
         }
     }
 }

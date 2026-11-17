@@ -41,6 +41,50 @@ public class EfBorrowingRepository : IBorrowingRepository
             .ToList();
     }
 
+    // UC-07: the full history of one student (active and returned), newest checkout first.
+    public async Task<BorrowingHistory> GetStudentHistoryAsync(int studentId, CancellationToken cancellationToken = default)
+    {
+        var exists = await _context.Students.AsNoTracking()
+            .AnyAsync(s => s.Id == studentId, cancellationToken);
+
+        if (!exists)
+        {
+            return BorrowingHistory.NotFound();
+        }
+
+        var records = await SearchAsync(
+            new BorrowingSearchCriteria(
+                Status: BorrowingStatusFilter.All,
+                SortField: BorrowingSortField.CheckoutDate,
+                Descending: true,
+                StudentId: studentId),
+            cancellationToken);
+
+        return BorrowingHistory.Found(records);
+    }
+
+    // UC-08: the full history of one equipment item (active and returned), newest checkout first.
+    public async Task<BorrowingHistory> GetEquipmentHistoryAsync(int equipmentId, CancellationToken cancellationToken = default)
+    {
+        var exists = await _context.Equipment.AsNoTracking()
+            .AnyAsync(e => e.Id == equipmentId, cancellationToken);
+
+        if (!exists)
+        {
+            return BorrowingHistory.NotFound();
+        }
+
+        var records = await SearchAsync(
+            new BorrowingSearchCriteria(
+                Status: BorrowingStatusFilter.All,
+                SortField: BorrowingSortField.CheckoutDate,
+                Descending: true,
+                EquipmentId: equipmentId),
+            cancellationToken);
+
+        return BorrowingHistory.Found(records);
+    }
+
     // UC-07, UC-08, UC-09 (BR-17): search, status filter and sort. All of it runs in PostgreSQL.
     public async Task<IReadOnlyList<BorrowingRecord>> SearchAsync(BorrowingSearchCriteria criteria, CancellationToken cancellationToken = default)
     {

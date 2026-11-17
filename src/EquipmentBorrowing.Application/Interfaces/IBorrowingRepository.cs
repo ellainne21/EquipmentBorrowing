@@ -9,7 +9,13 @@ public interface IBorrowingRepository
     // UC-04: active borrowings only, optionally narrowed by search text.
     Task<IEnumerable<ActiveBorrowingDetails>> GetActiveBorrowingsAsync(string? searchText, CancellationToken cancellationToken = default);
 
-    // UC-07, UC-08, UC-09: active and returned records with search, status filter and sort (BR-17).
+    // UC-09: active and returned records with search, status filter and sort (BR-17).
     // Filtering and sorting are done by the database.
     Task<IReadOnlyList<BorrowingRecord>> SearchAsync(BorrowingSearchCriteria criteria, CancellationToken cancellationToken = default);
+
+    // UC-07: every record (active and returned) of one student, newest checkout first.
+    Task<BorrowingHistory> GetStudentHistoryAsync(int studentId, CancellationToken cancellationToken = default);
+
+    // UC-08: every record (active and returned) of one equipment item, newest checkout first.
+    Task<BorrowingHistory> GetEquipmentHistoryAsync(int equipmentId, CancellationToken cancellationToken = default);
 }

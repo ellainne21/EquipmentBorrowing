@@ -9,6 +9,8 @@ public partial class MainViewModel : ViewModelBase
     private readonly EquipmentViewModel _equipmentViewModel;
     private readonly BorrowingsViewModel _borrowingsViewModel;
     private readonly BorrowingSearchViewModel _borrowingSearchViewModel;
+    private readonly StudentHistoryViewModel _studentHistoryViewModel;
+    private readonly EquipmentHistoryViewModel _equipmentHistoryViewModel;
     private readonly StudentsViewModel _studentsViewModel;
     private readonly EquipmentManagementViewModel _equipmentManagementViewModel;
 
@@ -19,12 +21,16 @@ public partial class MainViewModel : ViewModelBase
         EquipmentViewModel equipmentViewModel,
         BorrowingsViewModel borrowingsViewModel,
         BorrowingSearchViewModel borrowingSearchViewModel,
+        StudentHistoryViewModel studentHistoryViewModel,
+        EquipmentHistoryViewModel equipmentHistoryViewModel,
         StudentsViewModel studentsViewModel,
         EquipmentManagementViewModel equipmentManagementViewModel)
     {
         _equipmentViewModel = equipmentViewModel;
         _borrowingsViewModel = borrowingsViewModel;
         _borrowingSearchViewModel = borrowingSearchViewModel;
+        _studentHistoryViewModel = studentHistoryViewModel;
+        _equipmentHistoryViewModel = equipmentHistoryViewModel;
         _studentsViewModel = studentsViewModel;
         _equipmentManagementViewModel = equipmentManagementViewModel;
 
@@ -37,6 +43,8 @@ public partial class MainViewModel : ViewModelBase
         new EquipmentViewModel(),
         new BorrowingsViewModel(),
         new BorrowingSearchViewModel(),
+        new StudentHistoryViewModel(),
+        new EquipmentHistoryViewModel(),
         new StudentsViewModel(),
         new EquipmentManagementViewModel())
     {
@@ -62,6 +70,20 @@ public partial class MainViewModel : ViewModelBase
     {
         CurrentPage = _borrowingSearchViewModel;
         await _borrowingSearchViewModel.LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task ShowStudentHistory()
+    {
+        CurrentPage = _studentHistoryViewModel;
+        await _studentHistoryViewModel.LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task ShowEquipmentHistory()
+    {
+        CurrentPage = _equipmentHistoryViewModel;
+        await _equipmentHistoryViewModel.LoadAsync();
     }
 
     [RelayCommand]

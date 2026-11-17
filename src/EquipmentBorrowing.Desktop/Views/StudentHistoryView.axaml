@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="520"
+             x:Class="EquipmentBorrowing.Desktop.Views.StudentHistoryView"
+             x:DataType="vm:StudentHistoryViewModel">
+
+	<Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="8">
+
+		<TextBlock Grid.Row="0" Text="Student History"
+                   FontSize="20" FontWeight="Bold" Foreground="#831843" />
+
+		<!-- Selection -->
+		<Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+			<ComboBox Grid.Column="0" ItemsSource="{Binding Students}"
+                      SelectedItem="{Binding SelectedStudent}"
+                      PlaceholderText="Select student"
+                      HorizontalAlignment="Stretch">
+				<ComboBox.ItemTemplate>
+					<DataTemplate x:DataType="vm:StudentChoice">
+						<TextBlock Text="{Binding Label}" />
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+			<Button Grid.Column="1" Content="Refresh" Command="{Binding RefreshCommand}"
+                    Background="#FBCFE8" Foreground="#831843" />
+		</Grid>
+
+		<!-- Stale selection message -->
+		<TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="#BE185D" TextWrapping="Wrap" />
+
+		<!-- Loading state -->
+		<StackPanel Grid.Row="3" Spacing="4" IsVisible="{Binding IsLoading}">
+			<TextBlock Text="Loading student history..." Foreground="#831843" />
+			<ProgressBar IsIndeterminate="True" />
+		</StackPanel>
+
+		<!-- Heading and column headings -->
+		<Grid Grid.Row="4" RowDefinitions="Auto,Auto" RowSpacing="2">
+			<TextBlock Grid.Row="0" Text="{Binding HeaderText}" Foreground="#BE185D" FontSize="12" TextWrapping="Wrap" />
+			<Border Grid.Row="1" Padding="10,0" Margin="0,2">
+				<Grid ColumnDefinitions="40,*,*,95,95,95,75" ColumnSpacing="12">
+					<TextBlock Grid.Column="0" Text="Id" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="1" Text="Student" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="2" Text="Equipment" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="3" Text="Checked out" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="4" Text="Due" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="5" Text="Returned" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+					<TextBlock Grid.Column="6" Text="Status" FontWeight="Bold" FontSize="12" Foreground="#831843" />
+				</Grid>
+			</Border>
+		</Grid>
+
+		<Grid Grid.Row="5">
+			<ScrollViewer>
+				<ItemsControl ItemsSource="{Binding Rows}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate x:DataType="vm:BorrowingRow">
+							<Border Padding="10" Margin="0,2" Background="White"
+                                    BorderBrush="#FBCFE8" BorderThickness="1" CornerRadius="6">
+								<Grid ColumnDefinitions="40,*,*,95,95,95,75" ColumnSpacing="12">
+									<TextBlock Grid.Column="0" Text="{Binding BorrowingId}" FontWeight="Bold" Foreground="#831843" />
+									<StackPanel Grid.Column="1">
+										<TextBlock Text="{Binding StudentNumber}" FontWeight="Bold" Foreground="#831843" />
+										<TextBlock Text="{Binding StudentName}" />
+									</StackPanel>
+									<StackPanel Grid.Column="2">
+										<TextBlock Text="{Binding EquipmentIdentifier}" FontWeight="Bold" Foreground="#831843" />
+										<TextBlock Text="{Binding EquipmentName}" />
+									</StackPanel>
+									<TextBlock Grid.Column="3" Text="{Binding CheckedOut}" />
+									<TextBlock Grid.Column="4" Text="{Binding Due}" />
+									<TextBlock Grid.Column="5" Text="{Binding Returned}" />
+									<TextBlock Grid.Column="6" Text="{Binding Status}" FontWeight="SemiBold" />
+								</Grid>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+
+			<!-- Nothing selected yet -->
+			<TextBlock Text="Select a student to see their borrowing history." IsVisible="{Binding ShowPrompt}"
+                       Foreground="#831843" VerticalAlignment="Top" Margin="4" />
+
+			<!-- Empty state (selected, but no records) -->
+			<TextBlock Text="{Binding EmptyMessage}" IsVisible="{Binding IsEmpty}"
+                       Foreground="#831843" VerticalAlignment="Top" Margin="4" />
+
+			<!-- Error state -->
+			<StackPanel IsVisible="{Binding HasLoadError}" Spacing="8" VerticalAlignment="Top" Margin="4">
+				<TextBlock Text="{Binding LoadError}" Foreground="#B91C1C" TextWrapping="Wrap" />
+				<Button Content="Retry" Command="{Binding RefreshCommand}"
+                        Background="#F472B6" Foreground="White" />
+			</StackPanel>
+		</Grid>
+	</Grid>
+</UserControl>
