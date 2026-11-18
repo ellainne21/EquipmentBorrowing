@@ -700,7 +700,7 @@ AppDbContext → SQLite database
 
 ## Laboratory Activity 4: PostgreSQL, Multi-Item Checkout and Histories
 
-**Pair:** Ellainne G. Cabasag ([student ID]) and Floramay S. Balofinos ([student ID])
+**Pair:** Ellainne G. Cabasag  and Floramay S. Balofinos 
 
 Lab 4 continues the same application. Lab 3 stored data in SQLite. Lab 4 replaces SQLite with
 PostgreSQL, adds a transactional multi-item checkout, histories, search and student/equipment
