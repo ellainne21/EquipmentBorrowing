@@ -700,7 +700,7 @@ AppDbContext → SQLite database
 
 ## Laboratory Activity 4: PostgreSQL, Multi-Item Checkout and Histories
 
-**Pair:** Ellainne G. Cabasag  and Floramay S. Balofinos 
+**Pair:** Ellainne G. Cabasag (2023304057) and Floramay S. Balofinos (2024302506) 
 
 Lab 4 continues the same application. Lab 3 stored data in SQLite. Lab 4 replaces SQLite with
 PostgreSQL, adds a transactional multi-item checkout, histories, search and student/equipment
@@ -893,7 +893,7 @@ Search, filter and sort (BR-17) run **in PostgreSQL**, not in memory. The borrow
 ### 10. Verification
 
 - **Automated tests:** `dotnet test` runs 51 tests on the real services with a fake in-memory unit of work. They cover the checkout rules (including exactly at the limit, duplicates, fewer than two), rollback after a failed write, the unknown outcome, returns and the domain rules.
-- **Manual and database evidence:** `docs/evidence/` holds screenshots with a fresh database readback for each scenario, including restart checks.
+- **Manual and database evidence:** `docs/evidence/` holds screenshots with a database readback for the main scenarios, including restart checks. Multi-item checkout rejections (ineligible student, unavailable item, over the limit, invalid date) and the lost-commit retry are verified by the automated tests (`CheckoutRuleTests`); `A03-single-borrow` and `A06-checkout` show the live behaviour and the rollback.
 - **Traceability:** `docs/Lab4_Traceability_Matrix.docx` connects each of the 14 use cases to the implementation, the business rules and the evidence (acceptance checks A01 to A19).
 
 ### 11. Git history
