@@ -28,3 +28,10 @@ RESULT  : {"id":6,"studentId":4,"equipmentId":6,"borrowedDate":"2026-11-10","exp
 
 
 NOTE: The 21:18:25 request was sent while the API was stopped (curl exit code 7, no HTTP response, no data changed). Re-run at 21:22:29 after starting the API without --reset-test-data. Test clock fixed at 2026-11-10.
+[2026-11-20 21:29:38] T05
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":3,"equipmentId":2,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 201
+LOCATION: http://localhost:5080/api/v1/borrowings/5
+RESULT  : {"id":5,"studentId":3,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-002","equipmentName":"Laptop"}
+
