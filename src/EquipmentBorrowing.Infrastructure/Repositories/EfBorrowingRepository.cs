@@ -7,13 +7,43 @@ using Microsoft.EntityFrameworkCore;
 namespace EquipmentBorrowing.Infrastructure.Repositories;
 
 // Read-only borrowing queries. Every query uses AsNoTracking, so no stale tracked data can be shown.
-public class EfBorrowingRepository : IBorrowingRepository
+public class EfBorrowingRepository : IBorrowingRepository, IBorrowingLookup
 {
     private readonly AppDbContext _context;
 
     public EfBorrowingRepository(AppDbContext context)
     {
         _context = context;
+    }
+
+    // Join the borrowing with its student and equipment (read-only). Shared by every query below.
+    private IQueryable<BorrowingRecord> BuildRecords()
+    {
+        return
+            from b in _context.Borrowings.AsNoTracking()
+            join s in _context.Students.AsNoTracking() on b.StudentId equals s.Id
+            join e in _context.Equipment.AsNoTracking() on b.EquipmentId equals e.Id
+            select new BorrowingRecord
+            {
+                BorrowingId = b.Id,
+                StudentId = s.Id,
+                StudentNumber = s.StudentNumber,
+                StudentName = s.Name,
+                EquipmentId = e.Id,
+                EquipmentIdentifier = e.Identifier,
+                EquipmentName = e.Name,
+                DateBorrowed = b.DateBorrowed,
+                ExpectedReturnDate = b.ExpectedReturnDate,
+                ReturnedDate = b.ReturnedDate,
+                Status = b.Status
+            };
+    }
+
+    // Lab 5 (API-12, API-13): one borrowing record by its id, or null if it does not exist.
+    public async Task<BorrowingRecord?> GetRecordAsync(int borrowingId, CancellationToken cancellationToken = default)
+    {
+        return await BuildRecords()
+            .FirstOrDefaultAsync(r => r.BorrowingId == borrowingId, cancellationToken);
     }
 
     // UC-04: the active list is the same query as the search, fixed to "active" and sorted by due date.
@@ -88,25 +118,8 @@ public class EfBorrowingRepository : IBorrowingRepository
     // UC-07, UC-08, UC-09 (BR-17): search, status filter and sort. All of it runs in PostgreSQL.
     public async Task<IReadOnlyList<BorrowingRecord>> SearchAsync(BorrowingSearchCriteria criteria, CancellationToken cancellationToken = default)
     {
-        // 1. Join the borrowing with its student and equipment (read-only)
-        var records =
-            from b in _context.Borrowings.AsNoTracking()
-            join s in _context.Students.AsNoTracking() on b.StudentId equals s.Id
-            join e in _context.Equipment.AsNoTracking() on b.EquipmentId equals e.Id
-            select new BorrowingRecord
-            {
-                BorrowingId = b.Id,
-                StudentId = s.Id,
-                StudentNumber = s.StudentNumber,
-                StudentName = s.Name,
-                EquipmentId = e.Id,
-                EquipmentIdentifier = e.Identifier,
-                EquipmentName = e.Name,
-                DateBorrowed = b.DateBorrowed,
-                ExpectedReturnDate = b.ExpectedReturnDate,
-                ReturnedDate = b.ReturnedDate,
-                Status = b.Status
-            };
+        // 1. Borrowings joined with their student and equipment
+        var records = BuildRecords();
 
         // 2. Optional history filters (UC-07 one student, UC-08 one item)
         if (criteria.StudentId.HasValue)
@@ -159,6 +172,3 @@ public class EfBorrowingRepository : IBorrowingRepository
         return await ordered.ToListAsync(cancellationToken);
     }
 }
-
-//$env:EQUIPMENT_BORROWING_DB="Test"
-//dotnet run --project src/EquipmentBorrowing.Desktop

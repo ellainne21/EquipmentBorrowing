@@ -1,4 +1,4 @@
-﻿using EquipmentBorrowing.Application.Interfaces;
+using EquipmentBorrowing.Application.Interfaces;
 using EquipmentBorrowing.Application.Models;
 
 namespace EquipmentBorrowing.Application.Services;
@@ -35,7 +35,7 @@ public class ChangeStudentEligibilityService
 
             return OperationResult.Success(isAllowedToBorrow
                 ? $"{student.Name} is now allowed to borrow."
-                : $"{student.Name} is now restricted from new borrowicd C:\\Users\\ellai\\EquipmentBorrowing\r\n$env:EQUIPMENT_BORROWING_DB=\"Test\"\r\ndotnet run --project src/EquipmentBorrowing.Desktopcd C:\\Users\\ellai\\EquipmentBorrowing\r\ngit add docs/evidence\r\ngit commit -m \"Add Lab 4 test evidence screenshots (A05, A06, A12-A13, A18)\"\r\ngit pushcd C:\\Users\\ellai\\EquipmentBorrowing\r\n$env:EQUIPMENT_BORROWING_DB=\"Test\"\r\ndotnet run --project src/EquipmentBorrowing.Desktopng. Existing borrowings stay active and can still be returned.",
+                : $"{student.Name} is now restricted from new borrowing. Existing borrowings stay active and can still be returned.",
                 student.Id);
         }
         catch (OperationCanceledException) { throw; }

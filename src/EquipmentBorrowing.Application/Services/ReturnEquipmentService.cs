@@ -11,16 +11,19 @@ public class ReturnEquipmentService
 {
     private readonly IBorrowingUnitOfWorkFactory _factory;
     private readonly ICheckoutFaultInjector _faults;
+    private readonly IClock _clock;
 
-    public ReturnEquipmentService(IBorrowingUnitOfWorkFactory factory, ICheckoutFaultInjector faults)
+    // Lab 5: the clock is optional so existing callers still work. Without one, the real local date is used.
+    public ReturnEquipmentService(IBorrowingUnitOfWorkFactory factory, ICheckoutFaultInjector faults, IClock? clock = null)
     {
         _factory = factory;
         _faults = faults;
+        _clock = clock ?? new SystemClock();
     }
 
     public async Task<OperationResult> ExecuteAsync(int borrowingId, CancellationToken cancellationToken = default)
     {
-        var returnDate = DateTime.Today; // local calendar date (BR-13)
+        var returnDate = _clock.Today; // local calendar date (BR-13)
 
         await using var uow = _factory.Create();
         Equipment equipment;

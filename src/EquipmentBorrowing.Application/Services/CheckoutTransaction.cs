@@ -15,11 +15,14 @@ public class CheckoutTransaction
 
     private readonly IBorrowingUnitOfWorkFactory _factory;
     private readonly ICheckoutFaultInjector _faults;
+    private readonly IClock _clock;
 
-    public CheckoutTransaction(IBorrowingUnitOfWorkFactory factory, ICheckoutFaultInjector faults)
+    // Lab 5: the clock is optional so existing callers still work. Without one, the real local date is used.
+    public CheckoutTransaction(IBorrowingUnitOfWorkFactory factory, ICheckoutFaultInjector faults, IClock? clock = null)
     {
         _factory = factory;
         _faults = faults;
+        _clock = clock ?? new SystemClock();
     }
 
     public async Task<OperationResult> ExecuteAsync(
@@ -28,7 +31,7 @@ public class CheckoutTransaction
         DateTime expectedReturnDate,
         CancellationToken cancellationToken = default)
     {
-        var checkoutDate = DateTime.Today; // local calendar date (BR-11)
+        var checkoutDate = _clock.Today; // local calendar date (BR-11)
 
         // ---- Checks that need no database ----
         if (equipmentIds.Count == 0)
