@@ -1,0 +1,90 @@
+﻿[2026-11-20 19:40:03] T01
+REQUEST : GET /api/v1/equipment
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : [{"id":1,"equipmentCode":"EQ-001","name":"Camera","description":null,"isAvailable":false},{"id":2,"equipmentCode":"EQ-002","name":"Laptop","description":null,"isAvailable":true},{"id":3,"equipmentCode":"EQ-003","name":"Projector","description":null,"isAvailable":true},{"id":4,"equipmentCode":"EQ-004","name":"Tablet","description":null,"isAvailable":false},{"id":5,"equipmentCode":"EQ-005","name":"Microphone","description":null,"isAvailable":false},{"id":6,"equipmentCode":"EQ-006","name":"Tripod","description":null,"isAvailable":true},{"id":7,"equipmentCode":"EQ-007","name":"Speaker","description":null,"isAvailable":true}]
+
+[2026-11-20 19:40:03] T01
+REQUEST : GET /api/v1/equipment?available=true
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : [{"id":2,"equipmentCode":"EQ-002","name":"Laptop","description":null,"isAvailable":true},{"id":3,"equipmentCode":"EQ-003","name":"Projector","description":null,"isAvailable":true},{"id":6,"equipmentCode":"EQ-006","name":"Tripod","description":null,"isAvailable":true},{"id":7,"equipmentCode":"EQ-007","name":"Speaker","description":null,"isAvailable":true}]
+
+[2026-11-20 19:40:03] T01
+REQUEST : GET /api/v1/students
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : [{"id":1,"studentNumber":"ST-100","fullName":"Ada Cruz","contact":null,"isEligible":true},{"id":2,"studentNumber":"ST-200","fullName":"Ben Diaz","contact":null,"isEligible":false},{"id":3,"studentNumber":"ST-300","fullName":"Cara Lim","contact":null,"isEligible":true},{"id":4,"studentNumber":"ST-400","fullName":"Dani Ong","contact":null,"isEligible":true}]
+
+[2026-11-20 19:40:04] T01
+REQUEST : GET /api/v1/students/1
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : {"id":1,"studentNumber":"ST-100","fullName":"Ada Cruz","contact":null,"isEligible":true}
+
+[2026-11-20 19:40:04] T01
+REQUEST : GET /api/v1/equipment/1
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : {"id":1,"equipmentCode":"EQ-001","name":"Camera","description":null,"isAvailable":false}
+
+[2026-11-20 19:40:04] T01
+REQUEST : GET /api/v1/borrowings/1
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : {"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}
+
+[2026-11-20 19:40:04] T01
+REQUEST : GET /api/v1/students/1/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : [{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"},{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-20 19:40:05] T01
+REQUEST : GET /api/v1/equipment/1/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-20 19:40:05] T01
+REQUEST : GET /api/v1/borrowings?status=Active
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"},{"id":3,"studentId":3,"equipmentId":4,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-004","equipmentName":"Tablet"},{"id":4,"studentId":3,"equipmentId":5,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-005","equipmentName":"Microphone"}]
+
+[2026-11-20 19:40:05] T01
+REQUEST : GET /api/v1/students/4/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+RESULT  : []
+
+[2026-11-20 19:40:05] T01
+REQUEST : GET /api/v1/students/9999
+BODY    : (none)
+RESPONSE: HTTP 404
+RESULT  : {"code":"not_found","message":"The student was not found."}
+
+[2026-11-20 19:40:05] T01
+REQUEST : GET /api/v1/equipment/9999
+BODY    : (none)
+RESPONSE: HTTP 404
+RESULT  : {"code":"not_found","message":"The equipment item was not found."}
+
+[2026-11-20 19:40:05] T01
+REQUEST : GET /api/v1/borrowings/9999
+BODY    : (none)
+RESPONSE: HTTP 404
+RESULT  : {"code":"not_found","message":"The borrowing was not found."}
+
+[2026-11-20 19:40:05] T01
+REQUEST : GET /api/v1/nothing-here
+BODY    : (none)
+RESPONSE: HTTP 404
+RESULT  : {"code":"not_found","message":"There is no such route. Check the address and the /api/v1 prefix."}
+
+[2026-11-20 19:40:05] T01
+REQUEST : DELETE /api/v1/students/1
+BODY    : (none)
+RESPONSE: HTTP 405
+RESULT  : {"code":"method_not_allowed","message":"This route does not support that HTTP method."}
+

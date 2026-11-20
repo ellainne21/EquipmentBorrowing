@@ -1,0 +1,70 @@
+﻿[2026-11-20 20:31:02] T03
+REQUEST : POST /api/v1/equipment
+BODY    : {"equipmentCode":"EQ-008","name":"Charger","description":null}
+RESPONSE: HTTP 201
+LOCATION: http://localhost:5080/api/v1/equipment/8
+RESULT  : {"id":8,"equipmentCode":"EQ-008","name":"Charger","description":null,"isAvailable":true}
+
+[2026-11-20 20:31:02] T03
+REQUEST : GET /api/v1/equipment/8
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":8,"equipmentCode":"EQ-008","name":"Charger","description":null,"isAvailable":true}
+
+[2026-11-20 20:31:02] T03
+REQUEST : PUT /api/v1/equipment/8
+BODY    : {"equipmentCode":"EQ-008","name":"Fast Charger","description":null}
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":8,"equipmentCode":"EQ-008","name":"Fast Charger","description":null,"isAvailable":true}
+
+[2026-11-20 20:31:02] T03
+REQUEST : PUT /api/v1/equipment/1
+BODY    : {"equipmentCode":"EQ-001","name":"Camera","description":"Black body, 50mm lens"}
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":1,"equipmentCode":"EQ-001","name":"Camera","description":"Black body, 50mm lens","isAvailable":false}
+
+[2026-11-20 20:31:02] T03
+REQUEST : PUT /api/v1/equipment/8
+BODY    : {"equipmentCode":"EQ-008","name":"   ","description":null}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"Name is required."}
+
+[2026-11-20 20:31:02] T03
+REQUEST : PUT /api/v1/equipment/8
+BODY    : {"equipmentCode":" eq-001 ","name":"Fast Charger","description":null}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Equipment identifier 'eq-001' belongs to another item."}
+
+[2026-11-20 20:31:02] T03
+REQUEST : PUT /api/v1/equipment/1
+BODY    : {"equipmentCode":"EQ-001","name":"Camera","description":null,"isAvailable":true}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"The request is not valid. Check the JSON field names, the value types and the date format (YYYY-MM-DD)."}
+
+[2026-11-20 20:31:03] T03
+REQUEST : GET /api/v1/equipment/1/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-20 20:34:23] T03
+REQUEST : GET /api/v1/equipment/8
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":8,"equipmentCode":"EQ-008","name":"Fast Charger","description":null,"isAvailable":true}
+
+[2026-11-20 20:34:24] T03
+REQUEST : GET /api/v1/equipment/1
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":1,"equipmentCode":"EQ-001","name":"Camera","description":"Black body, 50mm lens","isAvailable":false}
+
