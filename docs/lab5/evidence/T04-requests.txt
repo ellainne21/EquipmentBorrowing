@@ -1,0 +1,119 @@
+﻿[2026-11-20 20:42:12] T04
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":2,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 201
+LOCATION: http://localhost:5080/api/v1/borrowings/5
+RESULT  : {"id":5,"studentId":4,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-400","studentName":"Dani Ong","equipmentCode":"EQ-002","equipmentName":"Laptop"}
+
+[2026-11-20 20:42:12] T04
+REQUEST : GET /api/v1/borrowings/5
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":5,"studentId":4,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-400","studentName":"Dani Ong","equipmentCode":"EQ-002","equipmentName":"Laptop"}
+
+[2026-11-20 20:44:05] T04
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":2,"equipmentId":6,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Ben Diaz is not allowed to borrow right now. Nothing was checked out."}
+
+[2026-11-20 20:44:06] T04
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":1,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Not available: EQ-001 (Camera). Nothing was checked out."}
+
+[2026-11-20 20:44:06] T04
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":9999,"equipmentId":6,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 404
+LOCATION: (none)
+RESULT  : {"code":"not_found","message":"The student was not found."}
+
+[2026-11-20 20:44:06] T04
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":9999,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 404
+LOCATION: (none)
+RESULT  : {"code":"not_found","message":"The equipment item was not found."}
+
+[2026-11-20 20:44:06] T04
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":6,"expectedReturnDate":"2026-11-10"}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"expectedReturnDate must be later than the checkout date (2026-11-10)."}
+
+[2026-11-20 20:44:06] T04
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":6,"expectedReturnDate":"2026-13-45"}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"The request is not valid. Check the JSON field names, the value types and the date format (YYYY-MM-DD)."}
+
+[2026-11-20 20:48:49] T04
+REQUEST : POST /api/v1/borrowings/5/return
+BODY    : {}
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":5,"studentId":4,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-10","status":"Returned","studentNumber":"ST-400","studentName":"Dani Ong","equipmentCode":"EQ-002","equipmentName":"Laptop"}
+
+[2026-11-20 20:48:49] T04
+REQUEST : GET /api/v1/borrowings/5
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":5,"studentId":4,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-10","status":"Returned","studentNumber":"ST-400","studentName":"Dani Ong","equipmentCode":"EQ-002","equipmentName":"Laptop"}
+
+[2026-11-20 20:48:49] T04
+REQUEST : POST /api/v1/borrowings/5/return
+BODY    : {}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"This borrowing was already returned. No change was made."}
+
+[2026-11-20 20:50:38] T04
+REQUEST : GET /api/v1/borrowings/5
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-20 20:50:40] T04
+REQUEST : GET /api/v1/equipment/2
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-20 20:51:25] T04
+REQUEST : GET /api/v1/borrowings/5
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-20 20:51:28] T04
+REQUEST : GET /api/v1/equipment/2
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-20 20:56:15] T04
+REQUEST : GET /api/v1/borrowings/5
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":5,"studentId":4,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-10","status":"Returned","studentNumber":"ST-400","studentName":"Dani Ong","equipmentCode":"EQ-002","equipmentName":"Laptop"}
+
+[2026-11-20 20:56:15] T04
+REQUEST : GET /api/v1/equipment/2
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":2,"equipmentCode":"EQ-002","name":"Laptop","description":null,"isAvailable":true}
+
