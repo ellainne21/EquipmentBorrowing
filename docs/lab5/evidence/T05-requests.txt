@@ -35,3 +35,10 @@ RESPONSE: HTTP 201
 LOCATION: http://localhost:5080/api/v1/borrowings/5
 RESULT  : {"id":5,"studentId":3,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-002","equipmentName":"Laptop"}
 
+[2026-11-21 07:52:11] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":1,"equipmentIds":[2,6],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 201
+LOCATION: (none)
+RESULT  : {"borrowings":[{"id":5,"studentId":1,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-002","equipmentName":"Laptop"},{"id":6,"studentId":1,"equipmentId":6,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-006","equipmentName":"Tripod"}]}
+
