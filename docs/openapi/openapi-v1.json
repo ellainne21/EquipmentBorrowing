@@ -403,6 +403,13 @@
         ],
         "parameters": [
           {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "available",
             "in": "query",
             "schema": {
