@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using EquipmentBorrowing.Application.Interfaces;
 using EquipmentBorrowing.Application.Services;
+using EquipmentBorrowing.Desktop.Api;
 using EquipmentBorrowing.Desktop.ViewModels;
 using EquipmentBorrowing.Desktop.Views;
 using EquipmentBorrowing.Infrastructure.Data;
@@ -11,6 +12,7 @@ using EquipmentBorrowing.Infrastructure.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Net.Http;
 
 namespace EquipmentBorrowing.Desktop;
 
@@ -90,6 +92,16 @@ public partial class App : Avalonia.Application
         services.AddTransient<StudentQueryService>();
         services.AddTransient<EquipmentQueryService>();
         services.AddTransient<BorrowingQueryService>();
+
+        // API client (the desktop talks to the API over HTTP only)
+        var apiBase = Environment.GetEnvironmentVariable("EQUIPMENT_BORROWING_API_URL") ?? "http://localhost:5080";
+        services.AddSingleton(new HttpClient
+        {
+            BaseAddress = new Uri(apiBase.TrimEnd('/') + "/"),
+            Timeout = TimeSpan.FromSeconds(15)
+        });
+        services.AddSingleton<ApiClient>();
+        services.AddSingleton<StudentsApi>();
 
         // ViewModels
         services.AddTransient<EquipmentViewModel>();

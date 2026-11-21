@@ -27,5 +27,6 @@
   <ItemGroup>
     <ProjectReference Include="..\EquipmentBorrowing.Application\EquipmentBorrowing.Application.csproj" />
     <ProjectReference Include="..\EquipmentBorrowing.Infrastructure\EquipmentBorrowing.Infrastructure.csproj" />
+    <ProjectReference Include="..\EquipmentBorrowing.Contracts\EquipmentBorrowing.Contracts.csproj" />
   </ItemGroup>
 </Project>

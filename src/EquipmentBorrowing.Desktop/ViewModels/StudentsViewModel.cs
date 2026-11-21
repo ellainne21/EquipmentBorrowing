@@ -3,22 +3,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EquipmentBorrowing.Application.Models;
-using EquipmentBorrowing.Application.Services;
-using EquipmentBorrowing.Domain;
+using EquipmentBorrowing.Contracts;
+using EquipmentBorrowing.Desktop.Api;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
 
-// One row of the students list (a display-only copy of a Student).
+// One row of the students list (a display-only copy of a StudentDto from the API).
 public class StudentRow
 {
-    public StudentRow(Student student)
+    public StudentRow(StudentDto student)
     {
         Id = student.Id;
         StudentNumber = student.StudentNumber;
-        FullName = student.Name;
+        FullName = student.FullName;
         Contact = student.Contact;
-        IsAllowedToBorrow = student.IsAllowedToBorrow;
+        IsAllowedToBorrow = student.IsEligible;
     }
 
     public int Id { get; }
@@ -33,10 +32,7 @@ public class StudentRow
 
 public partial class StudentsViewModel : PageViewModelBase
 {
-    private readonly StudentQueryService _query;
-    private readonly RegisterStudentService _register;
-    private readonly UpdateStudentService _update;
-    private readonly ChangeStudentEligibilityService _eligibility;
+    private readonly StudentsApi _api;
 
     private int _loadVersion;          // lets us ignore an older load that finishes late
     private bool _suppressFormFill;    // true while we re-select a row without touching the form
@@ -64,25 +60,15 @@ public partial class StudentsViewModel : PageViewModelBase
     [ObservableProperty]
     public partial string? EmptyMessage { get; set; }
 
-    public StudentsViewModel(
-        StudentQueryService query,
-        RegisterStudentService register,
-        UpdateStudentService update,
-        ChangeStudentEligibilityService eligibility)
+    public StudentsViewModel(StudentsApi api)
     {
-        _query = query;
-        _register = register;
-        _update = update;
-        _eligibility = eligibility;
+        _api = api;
     }
 
     // Parameterless constructor is only used by the XAML designer preview
     public StudentsViewModel()
     {
-        _query = null!;
-        _register = null!;
-        _update = null!;
-        _eligibility = null!;
+        _api = null!;
     }
 
     // Choosing a row copies its saved values into the form.
@@ -117,21 +103,22 @@ public partial class StudentsViewModel : PageViewModelBase
         StatusMessage = null;
     }
 
-    // UC-12: register a new student
+    // UC-12: register a new student (API-04)
     [RelayCommand]
     private async Task RegisterAsync()
     {
-        var result = await _register.ExecuteAsync(FormStudentNumber, FormFullName, FormContact);
+        IsLoading = true;
+        var result = await _api.CreateAsync(FormStudentNumber, FormFullName, FormContact);
 
         if (result.IsSuccess)
         {
             SearchText = null; // make sure the new student is visible in the list
         }
 
-        await ShowResultAsync(result);
+        await ShowResultAsync(result, "Student registered.");
     }
 
-    // UC-13: update the selected student's details
+    // UC-13: update the selected student's details (API-05)
     [RelayCommand]
     private async Task UpdateAsync()
     {
@@ -141,13 +128,14 @@ public partial class StudentsViewModel : PageViewModelBase
             return;
         }
 
-        var result = await _update.ExecuteAsync(
+        IsLoading = true;
+        var result = await _api.UpdateAsync(
             SelectedStudent.Id, FormStudentNumber, FormFullName, FormContact);
 
-        await ShowResultAsync(result);
+        await ShowResultAsync(result, "Student updated.");
     }
 
-    // UC-14: change borrowing eligibility
+    // UC-14: change borrowing eligibility (API-06)
     [RelayCommand]
     private Task PermitAsync() => ChangeEligibilityAsync(true);
 
@@ -162,16 +150,18 @@ public partial class StudentsViewModel : PageViewModelBase
             return;
         }
 
-        var result = await _eligibility.ExecuteAsync(SelectedStudent.Id, isAllowed);
-        await ShowResultAsync(result);
+        IsLoading = true;
+        var result = await _api.SetEligibilityAsync(SelectedStudent.Id, isAllowed);
+        await ShowResultAsync(result, isAllowed ? "Student is now eligible to borrow." : "Student is now restricted.");
     }
 
-    private async Task ShowResultAsync(OperationResult result)
+    private async Task ShowResultAsync(ApiResult<StudentDto> result, string successMessage)
     {
-        StatusMessage = $"{result.Outcome}: {result.Message}";
+        StatusMessage = result.IsSuccess ? successMessage : result.Message;
 
         // After a success the form shows the saved values. After a rejection it keeps what the user typed.
-        await ReloadAsync(result.EntityId ?? SelectedStudent?.Id, refillForm: result.IsSuccess);
+        // The list is always refreshed from the API, so stale data is corrected.
+        await ReloadAsync(result.Value?.Id ?? SelectedStudent?.Id, refillForm: result.IsSuccess);
     }
 
     private async Task ReloadAsync(int? selectId, bool refillForm)
@@ -182,20 +172,21 @@ public partial class StudentsViewModel : PageViewModelBase
 
         try
         {
-            var result = await _query.SearchAsync(SearchText);
+            var result = await _api.SearchAsync(SearchText);
 
             if (version != _loadVersion) return; // a newer load started; drop this old result
 
-            Students.Clear();
-
             if (!result.IsSuccess)
             {
+                // Keep the list on screen and say what went wrong (connection problem or server error).
                 IsEmpty = false;
-                LoadError = result.ErrorMessage;
+                LoadError = result.Message;
                 return;
             }
 
-            foreach (var student in result.Items)
+            Students.Clear();
+
+            foreach (var student in result.Value!)
             {
                 Students.Add(new StudentRow(student));
             }
