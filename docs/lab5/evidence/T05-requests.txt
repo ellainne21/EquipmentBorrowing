@@ -42,3 +42,17 @@ RESPONSE: HTTP 201
 LOCATION: (none)
 RESULT  : {"borrowings":[{"id":5,"studentId":1,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-002","equipmentName":"Laptop"},{"id":6,"studentId":1,"equipmentId":6,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-006","equipmentName":"Tripod"}]}
 
+[2026-11-21 07:57:21] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":3,"equipmentIds":[2,6],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Cara Lim already has 2 active item(s) and the limit is 3. Checking out 2 more would exceed it. Nothing was checked out."}
+
+[2026-11-21 07:59:36] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":3,"equipmentIds":[2,6],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Cara Lim already has 2 active item(s) and the limit is 3. Checking out 2 more would exceed it. Nothing was checked out."}
+
