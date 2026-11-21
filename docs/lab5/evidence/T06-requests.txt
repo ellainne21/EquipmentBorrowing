@@ -1,0 +1,249 @@
+﻿[2026-11-21 08:16:09] T06
+REQUEST : GET /api/v1/students/1/borrowings
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:16:12] T06
+REQUEST : GET /api/v1/students/4/borrowings
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:16:14] T06
+REQUEST : GET /api/v1/equipment/1/borrowings
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:16:16] T06
+REQUEST : GET /api/v1/equipment/3/borrowings
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:16:19] T06
+REQUEST : GET /api/v1/students/9999/borrowings
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:16:21] T06
+REQUEST : GET /api/v1/equipment/9999/borrowings
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+
+NOTE: The six requests at 08:16:09 to 08:16:21 were sent while the API was stopped (curl exit code 7, no HTTP response, read-only GETs, no data changed). Re-run at HH:MM after resetting the dataset and starting the API with no fault. Test clock fixed at 2026-11-10.
+[2026-11-21 08:17:28] T06
+REQUEST : GET /api/v1/borrowings?search=%20aDa%20
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:17:30] T06
+REQUEST : GET /api/v1/borrowings?search=st-300
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:17:32] T06
+REQUEST : GET /api/v1/borrowings?search=lapTOP
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:17:35] T06
+REQUEST : GET /api/v1/borrowings?status=Active
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:17:37] T06
+REQUEST : GET /api/v1/borrowings?status=Returned
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:17:39] T06
+REQUEST : GET /api/v1/borrowings?sort=borrowedDate&direction=desc
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:17:42] T06
+REQUEST : GET /api/v1/borrowings?sort=expectedReturnDate&direction=asc
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:17:44] T06
+REQUEST : GET /api/v1/borrowings?sort=expectedReturnDate&direction=desc
+BODY    : (none)
+RESPONSE: NO RESPONSE (no HTTP response received, curl exit code 7)
+LOCATION: (none)
+RESULT  : 
+
+[2026-11-21 08:22:11] T06
+REQUEST : GET /api/v1/students/1/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"},{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-21 08:22:11] T06
+REQUEST : GET /api/v1/students/4/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : []
+
+[2026-11-21 08:22:11] T06
+REQUEST : GET /api/v1/equipment/1/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-21 08:22:11] T06
+REQUEST : GET /api/v1/equipment/3/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"}]
+
+[2026-11-21 08:22:11] T06
+REQUEST : GET /api/v1/students/9999/borrowings
+BODY    : (none)
+RESPONSE: HTTP 404
+LOCATION: (none)
+RESULT  : {"code":"not_found","message":"The student was not found."}
+
+[2026-11-21 08:22:11] T06
+REQUEST : GET /api/v1/equipment/9999/borrowings
+BODY    : (none)
+RESPONSE: HTTP 404
+LOCATION: (none)
+RESULT  : {"code":"not_found","message":"The equipment item was not found."}
+
+[2026-11-21 08:23:07] T06
+REQUEST : GET /api/v1/borrowings?search=%20aDa%20
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"},{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"}]
+
+[2026-11-21 08:23:07] T06
+REQUEST : GET /api/v1/borrowings?search=st-300
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":3,"studentId":3,"equipmentId":4,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-004","equipmentName":"Tablet"},{"id":4,"studentId":3,"equipmentId":5,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-005","equipmentName":"Microphone"}]
+
+[2026-11-21 08:23:07] T06
+REQUEST : GET /api/v1/borrowings?search=lapTOP
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : []
+
+[2026-11-21 08:23:07] T06
+REQUEST : GET /api/v1/borrowings?search=cam
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-21 08:23:08] T06
+REQUEST : GET /api/v1/borrowings?status=Active
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"},{"id":3,"studentId":3,"equipmentId":4,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-004","equipmentName":"Tablet"},{"id":4,"studentId":3,"equipmentId":5,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-005","equipmentName":"Microphone"}]
+
+[2026-11-21 08:23:38] T06
+REQUEST : GET /api/v1/borrowings?status=Returned
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"}]
+
+[2026-11-21 08:23:38] T06
+REQUEST : GET /api/v1/borrowings?sort=borrowedDate&direction=desc
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":4,"studentId":3,"equipmentId":5,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-005","equipmentName":"Microphone"},{"id":3,"studentId":3,"equipmentId":4,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-004","equipmentName":"Tablet"},{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"},{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-21 08:23:38] T06
+REQUEST : GET /api/v1/borrowings?sort=expectedReturnDate&direction=asc
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"},{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"},{"id":3,"studentId":3,"equipmentId":4,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-004","equipmentName":"Tablet"},{"id":4,"studentId":3,"equipmentId":5,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-005","equipmentName":"Microphone"}]
+
+[2026-11-21 08:23:38] T06
+REQUEST : GET /api/v1/borrowings?sort=expectedReturnDate&direction=desc
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":4,"studentId":3,"equipmentId":5,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-005","equipmentName":"Microphone"},{"id":3,"studentId":3,"equipmentId":4,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-004","equipmentName":"Tablet"},{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"},{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-21 08:25:53] T06
+REQUEST : GET /api/v1/borrowings?search=cruz&status=Active&sort=borrowedDate&direction=desc
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}]
+
+[2026-11-21 08:25:53] T06
+REQUEST : GET /api/v1/borrowings
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : [{"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"},{"id":2,"studentId":1,"equipmentId":3,"borrowedDate":"2026-11-02","expectedReturnDate":"2026-11-12","returnedDate":"2026-11-08","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-003","equipmentName":"Projector"},{"id":3,"studentId":3,"equipmentId":4,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-004","equipmentName":"Tablet"},{"id":4,"studentId":3,"equipmentId":5,"borrowedDate":"2026-11-03","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-300","studentName":"Cara Lim","equipmentCode":"EQ-005","equipmentName":"Microphone"}]
+
+[2026-11-21 08:25:53] T06
+REQUEST : GET /api/v1/borrowings?search=zzzz
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : []
+
+[2026-11-21 08:25:53] T06
+REQUEST : GET /api/v1/borrowings?status=Overdue
+BODY    : (none)
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"status must be Active, Returned or All."}
+
+[2026-11-21 08:27:33] T06
+REQUEST : GET /api/v1/borrowings?sort=name
+BODY    : (none)
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"sort must be borrowedDate or expectedReturnDate."}
+
+[2026-11-21 08:27:33] T06
+REQUEST : GET /api/v1/borrowings?direction=up
+BODY    : (none)
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"direction must be asc or desc."}
+
+
+NOTE: The requests at 08:16:09 to 08:16:21 (histories) and 08:17:28 to 08:17:42 (search, filter, sort) were sent while the API was stopped (curl exit code 7, no HTTP response, read-only GETs, no data changed). Re-run from 08:22:11 after resetting the dataset and starting the API with no fault. Test clock fixed at 2026-11-10. Ties in date sorting are broken by borrowing ID, following the requested direction.
