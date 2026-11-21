@@ -98,3 +98,10 @@ RESPONSE: HTTP 400
 LOCATION: (none)
 RESULT  : {"code":"validation_error","message":"The request is not valid. Check the JSON field names, the value types and the date format (YYYY-MM-DD)."}
 
+[2026-11-21 08:10:35] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":4,"equipmentIds":[2,6],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 500
+LOCATION: (none)
+RESULT  : {"code":"server_error","message":"The checkout could not be saved, so no changes were made. Check the database connection, refresh the lists, then try again."}
+
