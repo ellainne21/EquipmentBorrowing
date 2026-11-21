@@ -17,7 +17,7 @@ public enum ApiOutcome
     Conflict,         // 409: the API answered
     ServerError,      // 500 or other: the API answered, but failed safely
     Unreachable,      // no HTTP response was received at all
-    UnknownOutcome    // a change was sent, but the answer was lost: refresh before retrying
+    UnknownOutcome    // a change was sent, but its result is not known: refresh before retrying
 }
 
 public sealed class ApiResult<T>
@@ -70,7 +70,15 @@ public sealed class ApiClient
                     : new ApiResult<T> { Outcome = ApiOutcome.Success, Value = value };
             }
 
-            var message = await ReadErrorMessageAsync(response, ct);
+            // The API answered with an error status, so this is NOT a connection problem.
+            var (code, message) = await ReadErrorAsync(response, ct);
+
+            // The server says the commit result is not known (BR-18): never retry blindly.
+            if (code == "outcome_unknown")
+            {
+                return Fail<T>(ApiOutcome.UnknownOutcome, message);
+            }
+
             var outcome = response.StatusCode switch
             {
                 HttpStatusCode.BadRequest => ApiOutcome.ValidationError,
@@ -82,7 +90,7 @@ public sealed class ApiClient
         }
         catch (HttpRequestException ex)
         {
-            // Connection refused or host not found: nothing was sent, so there was no HTTP response.
+            // Connection refused or host not found: there was no HTTP response.
             if (ex.InnerException is SocketException se &&
                 se.SocketErrorCode is SocketError.ConnectionRefused
                     or SocketError.HostNotFound
@@ -113,16 +121,16 @@ public sealed class ApiClient
         }
     }
 
-    private static async Task<string> ReadErrorMessageAsync(HttpResponseMessage response, CancellationToken ct)
+    private static async Task<(string? Code, string Message)> ReadErrorAsync(HttpResponseMessage response, CancellationToken ct)
     {
         try
         {
             var error = await response.Content.ReadFromJsonAsync<ApiError>(Json, ct);
-            if (!string.IsNullOrWhiteSpace(error?.Message)) return error!.Message!;
+            if (!string.IsNullOrWhiteSpace(error?.Message)) return (error!.Code, error.Message!);
         }
         catch (JsonException) { }
 
-        return "The server could not complete the request. Refresh the lists, then try again.";
+        return (null, "The server could not complete the request. Refresh the lists, then try again.");
     }
 
     private static ApiResult<T> Fail<T>(ApiOutcome outcome, string message)

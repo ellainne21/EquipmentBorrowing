@@ -102,6 +102,8 @@ public partial class App : Avalonia.Application
         });
         services.AddSingleton<ApiClient>();
         services.AddSingleton<StudentsApi>();
+        services.AddSingleton<EquipmentApi>();
+        services.AddSingleton<BorrowingsApi>();
 
         // ViewModels
         services.AddTransient<EquipmentViewModel>();

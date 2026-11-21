@@ -33,13 +33,14 @@ public class EquipmentController : ApiControllerBase
     }
 
     // API-01: all equipment, or only the available ones with ?available=true (UC-01, UC-02).
+    // "search" is an optional extension to API-01 that keeps the Lab 4 catalog search working.
     // A value that is not true or false is a 400 (model binding).
     [HttpGet]
     [ProducesResponseType<List<EquipmentDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> List([FromQuery] bool? available, CancellationToken cancellationToken)
+    public async Task<IActionResult> List([FromQuery] string? search, [FromQuery] bool? available, CancellationToken cancellationToken)
     {
-        var result = await _query.SearchAsync(null, available == true, cancellationToken);
+        var result = await _query.SearchAsync(search, available == true, cancellationToken);
         if (!result.IsSuccess) return ServerFailure(result.ErrorMessage);
 
         return Ok(result.Items.Select(e => e.ToDto()).ToList());

@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EquipmentBorrowing.Application.Models;
-using EquipmentBorrowing.Application.Services;
+using EquipmentBorrowing.Contracts;
+using EquipmentBorrowing.Desktop.Api;
 using EquipmentBorrowing.Domain;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
@@ -13,6 +14,17 @@ namespace EquipmentBorrowing.Desktop.ViewModels;
 // One row of the equipment catalog. The tick box chooses it for checkout.
 public partial class EquipmentChoice : ObservableObject
 {
+    // From the API (Lab 5)
+    public EquipmentChoice(EquipmentDto equipment)
+    {
+        Id = equipment.Id;
+        Identifier = equipment.EquipmentCode;
+        Name = equipment.Name;
+        Description = equipment.Description;
+        IsAvailable = equipment.IsAvailable;
+    }
+
+    // Old constructor, removed in the last cleanup step
     public EquipmentChoice(Equipment equipment)
     {
         Id = equipment.Id;
@@ -38,6 +50,14 @@ public partial class EquipmentChoice : ObservableObject
 // One entry of the student drop-down.
 public class StudentChoice
 {
+    // From the API (Lab 5)
+    public StudentChoice(StudentDto student)
+    {
+        Id = student.Id;
+        Label = $"{student.StudentNumber} - {student.FullName}" + (student.IsEligible ? "" : " (restricted)");
+    }
+
+    // Old constructor, removed in the last cleanup step
     public StudentChoice(Student student)
     {
         Id = student.Id;
@@ -50,10 +70,9 @@ public class StudentChoice
 
 public partial class EquipmentViewModel : PageViewModelBase
 {
-    private readonly EquipmentQueryService _equipmentQuery;
-    private readonly StudentQueryService _studentQuery;
-    private readonly BorrowEquipmentService _borrowOne;
-    private readonly CheckOutMultipleEquipmentService _borrowMany;
+    private readonly EquipmentApi _equipmentApi;
+    private readonly StudentsApi _studentsApi;
+    private readonly BorrowingsApi _borrowingsApi;
 
     private int _loadVersion;
 
@@ -78,16 +97,11 @@ public partial class EquipmentViewModel : PageViewModelBase
     [ObservableProperty]
     public partial string? EmptyMessage { get; set; }
 
-    public EquipmentViewModel(
-        EquipmentQueryService equipmentQuery,
-        StudentQueryService studentQuery,
-        BorrowEquipmentService borrowOne,
-        CheckOutMultipleEquipmentService borrowMany)
+    public EquipmentViewModel(EquipmentApi equipmentApi, StudentsApi studentsApi, BorrowingsApi borrowingsApi)
     {
-        _equipmentQuery = equipmentQuery;
-        _studentQuery = studentQuery;
-        _borrowOne = borrowOne;
-        _borrowMany = borrowMany;
+        _equipmentApi = equipmentApi;
+        _studentsApi = studentsApi;
+        _borrowingsApi = borrowingsApi;
 
         _ = LoadAsync(); // the Equipment page is the first page shown
     }
@@ -95,15 +109,15 @@ public partial class EquipmentViewModel : PageViewModelBase
     // Parameterless constructor is only used by the XAML designer preview
     public EquipmentViewModel()
     {
-        _equipmentQuery = null!;
-        _studentQuery = null!;
-        _borrowOne = null!;
-        _borrowMany = null!;
+        _equipmentApi = null!;
+        _studentsApi = null!;
+        _borrowingsApi = null!;
     }
 
     // Ticking "available only" refreshes the list straight away (UC-02).
     partial void OnAvailableOnlyChanged(bool value)
     {
+        if (_equipmentApi is null) return;
         _ = ReloadAsync(clearChecks: false);
     }
 
@@ -119,11 +133,11 @@ public partial class EquipmentViewModel : PageViewModelBase
         return ReloadAsync(clearChecks: false);
     }
 
-    // UC-03 (one ticked item) and UC-06 (two or more ticked items)
+    // UC-03 (one ticked item, API-10) and UC-06 (two or more ticked items, API-11, all or nothing)
     [RelayCommand]
     private async Task CheckOutAsync()
     {
-        // Presentation checks only. The real rules live in the application services.
+        // Presentation checks only. The real rules live on the server.
         if (SelectedStudent is null)
         {
             StatusMessage = "Select a student first.";
@@ -137,16 +151,28 @@ public partial class EquipmentViewModel : PageViewModelBase
             return;
         }
 
-        var returnDate = ExpectedReturnDate.Date;
+        var returnDate = DateOnly.FromDateTime(ExpectedReturnDate.Date);
+        IsLoading = true;
 
-        var result = ids.Count == 1
-            ? await _borrowOne.ExecuteAsync(SelectedStudent.Id, ids[0], returnDate)
-            : await _borrowMany.ExecuteAsync(SelectedStudent.Id, ids, returnDate);
+        bool success;
+        if (ids.Count == 1)
+        {
+            var result = await _borrowingsApi.BorrowAsync(SelectedStudent.Id, ids[0], returnDate);
+            success = result.IsSuccess;
+            StatusMessage = success ? "Checked out 1 item." : Describe(result.Outcome, result.Message);
+        }
+        else
+        {
+            var result = await _borrowingsApi.CheckoutAsync(SelectedStudent.Id, ids, returnDate);
+            success = result.IsSuccess;
+            StatusMessage = success
+                ? $"Checked out {ids.Count} items. They were saved together."
+                : Describe(result.Outcome, result.Message);
+        }
 
-        StatusMessage = $"{result.Outcome}: {result.Message}";
-
-        // Always refresh, so the screen shows what is really stored now (also after a conflict).
-        await ReloadAsync(clearChecks: result.IsSuccess);
+        // Always refresh from the API, so the screen shows what is really stored now
+        // (after a success, a conflict, or an unknown outcome).
+        await ReloadAsync(clearChecks: success);
     }
 
     private async Task ReloadAsync(bool clearChecks)
@@ -157,14 +183,14 @@ public partial class EquipmentViewModel : PageViewModelBase
 
         // Remember the user's choices so a refresh does not throw them away
         var checkedIds = clearChecks
-            ? new System.Collections.Generic.HashSet<int>()
+            ? new HashSet<int>()
             : EquipmentList.Where(e => e.IsChecked).Select(e => e.Id).ToHashSet();
         var studentId = SelectedStudent?.Id;
 
         try
         {
-            var equipment = await _equipmentQuery.SearchAsync(SearchText, AvailableOnly);
-            var students = await _studentQuery.SearchAsync(null);
+            var equipment = await _equipmentApi.SearchAsync(SearchText, AvailableOnly);
+            var students = await _studentsApi.SearchAsync(null);
 
             if (version != _loadVersion) return; // a newer load started; drop this old result
 
@@ -174,16 +200,16 @@ public partial class EquipmentViewModel : PageViewModelBase
             if (!equipment.IsSuccess || !students.IsSuccess)
             {
                 IsEmpty = false;
-                LoadError = equipment.ErrorMessage ?? students.ErrorMessage;
+                LoadError = !equipment.IsSuccess ? equipment.Message : students.Message;
                 return;
             }
 
-            foreach (var student in students.Items)
+            foreach (var student in students.Value!)
             {
                 Students.Add(new StudentChoice(student));
             }
 
-            foreach (var item in equipment.Items)
+            foreach (var item in equipment.Value!)
             {
                 EquipmentList.Add(new EquipmentChoice(item) { IsChecked = checkedIds.Contains(item.Id) });
             }
