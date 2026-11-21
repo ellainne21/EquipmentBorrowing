@@ -10,7 +10,7 @@
 	<Grid ColumnDefinitions="*,300" ColumnSpacing="12">
 
 		<!-- Left: search + list -->
-		<Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="8">
+		<Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="8">
 
 			<TextBlock Grid.Row="0" Text="Students"
                        FontSize="20" FontWeight="Bold" Foreground="#831843" />
@@ -32,7 +32,19 @@
 				<ProgressBar IsIndeterminate="True" />
 			</StackPanel>
 
-			<Grid Grid.Row="3">
+			<!-- Error state: the API could not be reached, or it returned an error.
+			     It has its own row, so it never covers the list. -->
+			<Border Grid.Row="3" IsVisible="{Binding HasLoadError}"
+                    Padding="10" Background="#FEF2F2" BorderBrush="#FECACA"
+                    BorderThickness="1" CornerRadius="6">
+				<StackPanel Spacing="8">
+					<TextBlock Text="{Binding LoadError}" Foreground="#B91C1C" TextWrapping="Wrap" />
+					<Button Content="Retry" Command="{Binding SearchCommand}"
+                            Background="#F472B6" Foreground="White" />
+				</StackPanel>
+			</Border>
+
+			<Grid Grid.Row="4">
 				<ListBox ItemsSource="{Binding Students}"
                          SelectedItem="{Binding SelectedStudent}"
                          Background="Transparent">
@@ -54,17 +66,10 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 
-				<!-- Empty state: the query worked but returned no rows -->
+				<!-- Empty state: the request worked but returned no rows -->
 				<TextBlock Text="{Binding EmptyMessage}" IsVisible="{Binding IsEmpty}"
                            Foreground="#831843" TextWrapping="Wrap"
                            VerticalAlignment="Top" Margin="4" />
-
-				<!-- Error state: the database could not be reached -->
-				<StackPanel IsVisible="{Binding HasLoadError}" Spacing="8" VerticalAlignment="Top" Margin="4">
-					<TextBlock Text="{Binding LoadError}" Foreground="#B91C1C" TextWrapping="Wrap" />
-					<Button Content="Retry" Command="{Binding SearchCommand}"
-                            Background="#F472B6" Foreground="White" />
-				</StackPanel>
 			</Grid>
 		</Grid>
 
