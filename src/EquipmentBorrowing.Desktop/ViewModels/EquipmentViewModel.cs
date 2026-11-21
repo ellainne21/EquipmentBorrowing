@@ -7,28 +7,16 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EquipmentBorrowing.Contracts;
 using EquipmentBorrowing.Desktop.Api;
-using EquipmentBorrowing.Domain;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
 
 // One row of the equipment catalog. The tick box chooses it for checkout.
 public partial class EquipmentChoice : ObservableObject
 {
-    // From the API (Lab 5)
     public EquipmentChoice(EquipmentDto equipment)
     {
         Id = equipment.Id;
         Identifier = equipment.EquipmentCode;
-        Name = equipment.Name;
-        Description = equipment.Description;
-        IsAvailable = equipment.IsAvailable;
-    }
-
-    // Old constructor, removed in the last cleanup step
-    public EquipmentChoice(Equipment equipment)
-    {
-        Id = equipment.Id;
-        Identifier = equipment.Identifier;
         Name = equipment.Name;
         Description = equipment.Description;
         IsAvailable = equipment.IsAvailable;
@@ -50,18 +38,10 @@ public partial class EquipmentChoice : ObservableObject
 // One entry of the student drop-down.
 public class StudentChoice
 {
-    // From the API (Lab 5)
     public StudentChoice(StudentDto student)
     {
         Id = student.Id;
         Label = $"{student.StudentNumber} - {student.FullName}" + (student.IsEligible ? "" : " (restricted)");
-    }
-
-    // Old constructor, removed in the last cleanup step
-    public StudentChoice(Student student)
-    {
-        Id = student.Id;
-        Label = $"{student.StudentNumber} - {student.Name}" + (student.IsAllowedToBorrow ? "" : " (restricted)");
     }
 
     public int Id { get; }

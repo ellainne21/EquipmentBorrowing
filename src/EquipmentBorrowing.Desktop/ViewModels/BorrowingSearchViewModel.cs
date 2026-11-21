@@ -2,10 +2,8 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EquipmentBorrowing.Application.Models;
 using EquipmentBorrowing.Contracts;
 using EquipmentBorrowing.Desktop.Api;
-using EquipmentBorrowing.Domain;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
 
@@ -148,7 +146,6 @@ public partial class BorrowingSearchViewModel : PageViewModelBase
 // One row of the result list, with the text already prepared for display.
 public class BorrowingRow
 {
-    // From the API (Lab 5)
     public BorrowingRow(BorrowingDto record)
     {
         BorrowingId = record.Id;
@@ -160,20 +157,6 @@ public class BorrowingRow
         Due = record.ExpectedReturnDate.ToString("MM/dd/yyyy");
         Returned = record.ReturnedDate.HasValue ? record.ReturnedDate.Value.ToString("MM/dd/yyyy") : "-";
         Status = record.Status;
-    }
-
-    // Old constructor, used by the two history pages until they are migrated (removed in the last cleanup step)
-    public BorrowingRow(BorrowingRecord record)
-    {
-        BorrowingId = record.BorrowingId;
-        StudentNumber = record.StudentNumber;
-        StudentName = record.StudentName;
-        EquipmentIdentifier = record.EquipmentIdentifier;
-        EquipmentName = record.EquipmentName;
-        CheckedOut = record.DateBorrowed.ToString("MM/dd/yyyy");
-        Due = record.ExpectedReturnDate.ToString("MM/dd/yyyy");
-        Returned = record.ReturnedDate.HasValue ? record.ReturnedDate.Value.ToString("MM/dd/yyyy") : "-";
-        Status = record.Status == BorrowingStatus.Active ? "Active" : "Returned";
     }
 
     public int BorrowingId { get; }
