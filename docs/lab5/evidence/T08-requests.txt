@@ -26,3 +26,10 @@ RESPONSE: HTTP 200
 LOCATION: (none)
 RESULT  : [{"id":1,"studentNumber":"ST-100","fullName":"Ada Cruz","contact":null,"isEligible":true},{"id":2,"studentNumber":"ST-200","fullName":"Ben Diaz","contact":null,"isEligible":false},{"id":3,"studentNumber":"ST-300","fullName":"Cara Lim","contact":null,"isEligible":true},{"id":4,"studentNumber":"ST-400","fullName":"Dani Ong","contact":null,"isEligible":true}]
 
+[2026-11-21 21:31:09] T08
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":4,"equipmentIds":[2,6],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 500
+LOCATION: (none)
+RESULT  : {"code":"outcome_unknown","message":"The connection was lost while saving, so it is not known whether the change was saved. Nothing was retried automatically. Refresh the lists to see the current state before deciding what to do."}
+
