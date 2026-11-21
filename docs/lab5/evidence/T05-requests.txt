@@ -56,3 +56,45 @@ RESPONSE: HTTP 409
 LOCATION: (none)
 RESULT  : {"code":"conflict","message":"Cara Lim already has 2 active item(s) and the limit is 3. Checking out 2 more would exceed it. Nothing was checked out."}
 
+[2026-11-21 08:03:19] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":4,"equipmentIds":[2,2],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"The same item was listed more than once."}
+
+[2026-11-21 08:03:20] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":4,"equipmentIds":[2],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"A multi-item checkout needs at least two different items."}
+
+[2026-11-21 08:03:21] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":4,"equipmentIds":[1,2],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Not available: EQ-001 (Camera). Nothing was checked out."}
+
+[2026-11-21 08:03:21] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":2,"equipmentIds":[2,6],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Ben Diaz is not allowed to borrow right now. Nothing was checked out."}
+
+[2026-11-21 08:03:21] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":4,"equipmentIds":[2,9999],"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 404
+LOCATION: (none)
+RESULT  : {"code":"not_found","message":"The equipment item with id 9999 was not found. Nothing was checked out."}
+
+[2026-11-21 08:03:21] T05
+REQUEST : POST /api/v1/checkout-requests
+BODY    : {"studentId":4,"equipmentIds":[2,6],"expectedReturnDate":"2026-13-45"}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"The request is not valid. Check the JSON field names, the value types and the date format (YYYY-MM-DD)."}
+
