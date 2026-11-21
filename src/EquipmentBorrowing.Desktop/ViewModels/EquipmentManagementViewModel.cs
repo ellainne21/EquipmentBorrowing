@@ -3,19 +3,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EquipmentBorrowing.Application.Models;
-using EquipmentBorrowing.Application.Services;
-using EquipmentBorrowing.Domain;
+using EquipmentBorrowing.Contracts;
+using EquipmentBorrowing.Desktop.Api;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
 
-// One row of the equipment list (a display-only copy of an Equipment item).
+// One row of the equipment list (a display-only copy of an EquipmentDto from the API).
 public class EquipmentRow
 {
-    public EquipmentRow(Equipment equipment)
+    public EquipmentRow(EquipmentDto equipment)
     {
         Id = equipment.Id;
-        Identifier = equipment.Identifier;
+        Identifier = equipment.EquipmentCode;
         Name = equipment.Name;
         Description = equipment.Description;
         IsAvailable = equipment.IsAvailable;
@@ -33,9 +32,7 @@ public class EquipmentRow
 
 public partial class EquipmentManagementViewModel : PageViewModelBase
 {
-    private readonly EquipmentQueryService _query;
-    private readonly RegisterEquipmentService _register;
-    private readonly UpdateEquipmentService _update;
+    private readonly EquipmentApi _api;
 
     private int _loadVersion;
     private bool _suppressFormFill;
@@ -66,22 +63,15 @@ public partial class EquipmentManagementViewModel : PageViewModelBase
     [ObservableProperty]
     public partial string? EmptyMessage { get; set; }
 
-    public EquipmentManagementViewModel(
-        EquipmentQueryService query,
-        RegisterEquipmentService register,
-        UpdateEquipmentService update)
+    public EquipmentManagementViewModel(EquipmentApi api)
     {
-        _query = query;
-        _register = register;
-        _update = update;
+        _api = api;
     }
 
     // Parameterless constructor is only used by the XAML designer preview
     public EquipmentManagementViewModel()
     {
-        _query = null!;
-        _register = null!;
-        _update = null!;
+        _api = null!;
     }
 
     partial void OnSelectedEquipmentChanged(EquipmentRow? value)
@@ -96,6 +86,7 @@ public partial class EquipmentManagementViewModel : PageViewModelBase
     // Ticking or unticking "Available only" refreshes the list straight away (UC-02).
     partial void OnAvailableOnlyChanged(bool value)
     {
+        if (_api is null) return;
         _ = ReloadAsync(SelectedEquipment?.Id, refillForm: false);
     }
 
@@ -121,11 +112,12 @@ public partial class EquipmentManagementViewModel : PageViewModelBase
         StatusMessage = null;
     }
 
-    // UC-15: register new equipment
+    // UC-15: register new equipment (API-08)
     [RelayCommand]
     private async Task RegisterAsync()
     {
-        var result = await _register.ExecuteAsync(FormIdentifier, FormName, FormDescription);
+        IsLoading = true;
+        var result = await _api.CreateAsync(FormIdentifier, FormName, FormDescription);
 
         if (result.IsSuccess)
         {
@@ -133,10 +125,10 @@ public partial class EquipmentManagementViewModel : PageViewModelBase
             AvailableOnly = false; // new equipment is available, but clear filters so it is easy to see
         }
 
-        await ShowResultAsync(result);
+        await ShowResultAsync(result, "Equipment registered.");
     }
 
-    // UC-16: update the selected equipment's descriptive details (never its availability)
+    // UC-16: update the selected equipment's descriptive details (API-09, never its availability)
     [RelayCommand]
     private async Task UpdateAsync()
     {
@@ -146,16 +138,20 @@ public partial class EquipmentManagementViewModel : PageViewModelBase
             return;
         }
 
-        var result = await _update.ExecuteAsync(
+        IsLoading = true;
+        var result = await _api.UpdateAsync(
             SelectedEquipment.Id, FormIdentifier, FormName, FormDescription);
 
-        await ShowResultAsync(result);
+        await ShowResultAsync(result, "Equipment updated.");
     }
 
-    private async Task ShowResultAsync(OperationResult result)
+    private async Task ShowResultAsync(ApiResult<EquipmentDto> result, string successMessage)
     {
-        StatusMessage = $"{result.Outcome}: {result.Message}";
-        await ReloadAsync(result.EntityId ?? SelectedEquipment?.Id, refillForm: result.IsSuccess);
+        StatusMessage = result.IsSuccess ? successMessage : Describe(result.Outcome, result.Message);
+
+        // After a success the form shows the saved values. After a rejection it keeps what the user typed.
+        // The list is always refreshed from the API, so stale data is corrected.
+        await ReloadAsync(result.Value?.Id ?? SelectedEquipment?.Id, refillForm: result.IsSuccess);
     }
 
     private async Task ReloadAsync(int? selectId, bool refillForm)
@@ -166,20 +162,21 @@ public partial class EquipmentManagementViewModel : PageViewModelBase
 
         try
         {
-            var result = await _query.SearchAsync(SearchText, AvailableOnly);
+            var result = await _api.SearchAsync(SearchText, AvailableOnly);
 
             if (version != _loadVersion) return;
 
-            EquipmentList.Clear();
-
             if (!result.IsSuccess)
             {
+                // Keep the list on screen and say what went wrong (connection problem or server error).
                 IsEmpty = false;
-                LoadError = result.ErrorMessage;
+                LoadError = result.Message;
                 return;
             }
 
-            foreach (var item in result.Items)
+            EquipmentList.Clear();
+
+            foreach (var item in result.Value!)
             {
                 EquipmentList.Add(new EquipmentRow(item));
             }

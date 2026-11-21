@@ -3,18 +3,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EquipmentBorrowing.Application.Services;
-using EquipmentBorrowing.Domain;
+using EquipmentBorrowing.Contracts;
+using EquipmentBorrowing.Desktop.Api;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
 
 // One entry of the equipment drop-down on the history page.
 public class EquipmentOption
 {
-    public EquipmentOption(Equipment equipment)
+    public EquipmentOption(EquipmentDto equipment)
     {
         Id = equipment.Id;
-        Label = $"{equipment.Identifier} - {equipment.Name}";
+        Label = $"{equipment.EquipmentCode} - {equipment.Name}";
     }
 
     public int Id { get; }
@@ -24,8 +24,8 @@ public class EquipmentOption
 // UC-08: select an equipment item and see its active and returned borrowings. BR-14, BR-18, BR-19.
 public partial class EquipmentHistoryViewModel : PageViewModelBase
 {
-    private readonly EquipmentQueryService _equipmentQuery;
-    private readonly BorrowingQueryService _borrowingQuery;
+    private readonly EquipmentApi _equipmentApi;
+    private readonly BorrowingsApi _borrowingsApi;
 
     private int _loadVersion;
     private bool _suppressLoad;
@@ -49,17 +49,17 @@ public partial class EquipmentHistoryViewModel : PageViewModelBase
     [ObservableProperty]
     public partial string? HeaderText { get; set; }
 
-    public EquipmentHistoryViewModel(EquipmentQueryService equipmentQuery, BorrowingQueryService borrowingQuery)
+    public EquipmentHistoryViewModel(EquipmentApi equipmentApi, BorrowingsApi borrowingsApi)
     {
-        _equipmentQuery = equipmentQuery;
-        _borrowingQuery = borrowingQuery;
+        _equipmentApi = equipmentApi;
+        _borrowingsApi = borrowingsApi;
     }
 
     // Parameterless constructor is only used by the XAML designer preview
     public EquipmentHistoryViewModel()
     {
-        _equipmentQuery = null!;
-        _borrowingQuery = null!;
+        _equipmentApi = null!;
+        _borrowingsApi = null!;
     }
 
     // Called every time the page is opened: reloads the equipment list, then the history
@@ -72,7 +72,7 @@ public partial class EquipmentHistoryViewModel : PageViewModelBase
     // Choosing another item replaces the shown records (UC-08 1a)
     partial void OnSelectedEquipmentChanged(EquipmentOption? value)
     {
-        if (_suppressLoad || _borrowingQuery is null) return;
+        if (_suppressLoad || _borrowingsApi is null) return;
         _ = ReloadAsync(reloadEquipmentList: false);
     }
 
@@ -94,7 +94,7 @@ public partial class EquipmentHistoryViewModel : PageViewModelBase
         {
             if (reloadEquipmentList)
             {
-                var list = await _equipmentQuery.SearchAsync(null, false);
+                var list = await _equipmentApi.SearchAsync(null, false);
 
                 // A newer load has started; drop this old result
                 if (version != _loadVersion) return;
@@ -103,7 +103,7 @@ public partial class EquipmentHistoryViewModel : PageViewModelBase
                 {
                     ClearResults();
                     ShowPrompt = false;
-                    LoadError = list.ErrorMessage;
+                    LoadError = list.Message;
                     return;
                 }
 
@@ -111,7 +111,7 @@ public partial class EquipmentHistoryViewModel : PageViewModelBase
 
                 _suppressLoad = true;
                 EquipmentItems.Clear();
-                foreach (var equipment in list.Items)
+                foreach (var equipment in list.Value!)
                 {
                     EquipmentItems.Add(new EquipmentOption(equipment));
                 }
@@ -139,9 +139,18 @@ public partial class EquipmentHistoryViewModel : PageViewModelBase
 
             ShowPrompt = false;
             var selected = SelectedEquipment;
-            var result = await _borrowingQuery.GetEquipmentHistoryAsync(selected.Id);
+            var result = await _borrowingsApi.EquipmentHistoryAsync(selected.Id);
 
             if (version != _loadVersion) return;
+
+            // The server says the item does not exist any more (404)
+            if (result.Outcome == ApiOutcome.NotFound)
+            {
+                ClearResults();
+                ShowPrompt = true;
+                StatusMessage = "The selected equipment no longer exists. Please select an item.";
+                return;
+            }
 
             Rows.Clear();
 
@@ -149,11 +158,11 @@ public partial class EquipmentHistoryViewModel : PageViewModelBase
             {
                 IsEmpty = false;
                 HeaderText = null;
-                LoadError = result.ErrorMessage;
+                LoadError = result.Message;
                 return;
             }
 
-            foreach (var record in result.Items)
+            foreach (var record in result.Value!)
             {
                 Rows.Add(new BorrowingRow(record));
             }

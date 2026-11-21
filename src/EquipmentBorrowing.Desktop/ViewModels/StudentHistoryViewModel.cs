@@ -3,15 +3,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EquipmentBorrowing.Application.Services;
+using EquipmentBorrowing.Desktop.Api;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
 
 // UC-07: select a student and see that student's active and returned borrowings. BR-14, BR-18, BR-19.
 public partial class StudentHistoryViewModel : PageViewModelBase
 {
-    private readonly StudentQueryService _studentQuery;
-    private readonly BorrowingQueryService _borrowingQuery;
+    private readonly StudentsApi _studentsApi;
+    private readonly BorrowingsApi _borrowingsApi;
 
     private int _loadVersion;
     private bool _suppressLoad;
@@ -35,17 +35,17 @@ public partial class StudentHistoryViewModel : PageViewModelBase
     [ObservableProperty]
     public partial string? HeaderText { get; set; }
 
-    public StudentHistoryViewModel(StudentQueryService studentQuery, BorrowingQueryService borrowingQuery)
+    public StudentHistoryViewModel(StudentsApi studentsApi, BorrowingsApi borrowingsApi)
     {
-        _studentQuery = studentQuery;
-        _borrowingQuery = borrowingQuery;
+        _studentsApi = studentsApi;
+        _borrowingsApi = borrowingsApi;
     }
 
     // Parameterless constructor is only used by the XAML designer preview
     public StudentHistoryViewModel()
     {
-        _studentQuery = null!;
-        _borrowingQuery = null!;
+        _studentsApi = null!;
+        _borrowingsApi = null!;
     }
 
     // Called every time the page is opened: reloads the student list, then the history
@@ -58,7 +58,7 @@ public partial class StudentHistoryViewModel : PageViewModelBase
     // Choosing another student replaces the shown records (UC-07 1a)
     partial void OnSelectedStudentChanged(StudentChoice? value)
     {
-        if (_suppressLoad || _borrowingQuery is null) return;
+        if (_suppressLoad || _borrowingsApi is null) return;
         _ = ReloadAsync(reloadStudentList: false);
     }
 
@@ -80,7 +80,7 @@ public partial class StudentHistoryViewModel : PageViewModelBase
         {
             if (reloadStudentList)
             {
-                var list = await _studentQuery.SearchAsync(null);
+                var list = await _studentsApi.SearchAsync(null);
 
                 // A newer load has started; drop this old result
                 if (version != _loadVersion) return;
@@ -89,7 +89,7 @@ public partial class StudentHistoryViewModel : PageViewModelBase
                 {
                     ClearResults();
                     ShowPrompt = false;
-                    LoadError = list.ErrorMessage;
+                    LoadError = list.Message;
                     return;
                 }
 
@@ -97,7 +97,7 @@ public partial class StudentHistoryViewModel : PageViewModelBase
 
                 _suppressLoad = true;
                 Students.Clear();
-                foreach (var student in list.Items)
+                foreach (var student in list.Value!)
                 {
                     Students.Add(new StudentChoice(student));
                 }
@@ -125,9 +125,18 @@ public partial class StudentHistoryViewModel : PageViewModelBase
 
             ShowPrompt = false;
             var selected = SelectedStudent;
-            var result = await _borrowingQuery.GetStudentHistoryAsync(selected.Id);
+            var result = await _borrowingsApi.StudentHistoryAsync(selected.Id);
 
             if (version != _loadVersion) return;
+
+            // The server says the student does not exist any more (404)
+            if (result.Outcome == ApiOutcome.NotFound)
+            {
+                ClearResults();
+                ShowPrompt = true;
+                StatusMessage = "The selected student no longer exists. Please select a student.";
+                return;
+            }
 
             Rows.Clear();
 
@@ -135,11 +144,11 @@ public partial class StudentHistoryViewModel : PageViewModelBase
             {
                 IsEmpty = false;
                 HeaderText = null;
-                LoadError = result.ErrorMessage;
+                LoadError = result.Message;
                 return;
             }
 
-            foreach (var record in result.Items)
+            foreach (var record in result.Value!)
             {
                 Rows.Add(new BorrowingRow(record));
             }
