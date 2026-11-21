@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EquipmentBorrowing.Application.Models;
-using EquipmentBorrowing.Application.Services;
+using EquipmentBorrowing.Contracts;
+using EquipmentBorrowing.Desktop.Api;
 using EquipmentBorrowing.Domain;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
@@ -11,7 +12,7 @@ namespace EquipmentBorrowing.Desktop.ViewModels;
 // UC-09: search, filter and sort all borrowing records (active and returned). BR-17, BR-19.
 public partial class BorrowingSearchViewModel : PageViewModelBase
 {
-    private readonly BorrowingQueryService _query;
+    private readonly BorrowingsApi _api;
 
     private int _loadVersion;
     private bool _suppressReload;
@@ -42,16 +43,16 @@ public partial class BorrowingSearchViewModel : PageViewModelBase
     [ObservableProperty]
     public partial string? ResultCountText { get; set; }
 
-    public BorrowingSearchViewModel(BorrowingQueryService query)
+    public BorrowingSearchViewModel(BorrowingsApi api)
     {
-        _query = query;
+        _api = api;
         ResetCriteria();
     }
 
     // Parameterless constructor is only used by the XAML designer preview
     public BorrowingSearchViewModel()
     {
-        _query = null!;
+        _api = null!;
     }
 
     public Task LoadAsync() => ReloadAsync();
@@ -78,7 +79,7 @@ public partial class BorrowingSearchViewModel : PageViewModelBase
 
     private void ReloadIfReady()
     {
-        if (_suppressReload || _query is null) return;
+        if (_suppressReload || _api is null) return;
         _ = ReloadAsync();
     }
 
@@ -93,26 +94,6 @@ public partial class BorrowingSearchViewModel : PageViewModelBase
         _suppressReload = false;
     }
 
-    private BorrowingSearchCriteria BuildCriteria()
-    {
-        var status = SelectedStatusIndex switch
-        {
-            1 => BorrowingStatusFilter.Active,
-            2 => BorrowingStatusFilter.Returned,
-            _ => BorrowingStatusFilter.All
-        };
-
-        var sortField = SelectedSortIndex == 1
-            ? BorrowingSortField.ExpectedReturnDate
-            : BorrowingSortField.CheckoutDate;
-
-        return new BorrowingSearchCriteria(
-            SearchText: SearchText,
-            Status: status,
-            SortField: sortField,
-            Descending: SelectedDirectionIndex == 1);
-    }
-
     private async Task ReloadAsync()
     {
         var version = ++_loadVersion;
@@ -121,8 +102,12 @@ public partial class BorrowingSearchViewModel : PageViewModelBase
 
         try
         {
-            var criteria = BuildCriteria();
-            var result = await _query.SearchAsync(criteria);
+            // The three boxes become the API-14 query values
+            var status = SelectedStatusIndex switch { 1 => "Active", 2 => "Returned", _ => "All" };
+            var sort = SelectedSortIndex == 1 ? "expectedReturnDate" : "borrowedDate";
+            var direction = SelectedDirectionIndex == 1 ? "desc" : "asc";
+
+            var result = await _api.SearchAsync(SearchText, status, sort, direction);
 
             // A newer load has started; drop this old result
             if (version != _loadVersion) return;
@@ -133,11 +118,11 @@ public partial class BorrowingSearchViewModel : PageViewModelBase
             {
                 IsEmpty = false;
                 ResultCountText = null;
-                LoadError = result.ErrorMessage;
+                LoadError = result.Message;
                 return;
             }
 
-            foreach (var record in result.Items)
+            foreach (var record in result.Value!)
             {
                 Rows.Add(new BorrowingRow(record));
             }
@@ -145,8 +130,7 @@ public partial class BorrowingSearchViewModel : PageViewModelBase
             // "No matches" is an empty state, not an error (BR-17, BR-19)
             IsEmpty = Rows.Count == 0;
 
-            var hasCriteria = !string.IsNullOrWhiteSpace(criteria.SearchText)
-                              || criteria.Status != BorrowingStatusFilter.All;
+            var hasCriteria = !string.IsNullOrWhiteSpace(SearchText) || status != "All";
 
             EmptyMessage = hasCriteria
                 ? "No borrowing records match your search and filters."
@@ -164,6 +148,21 @@ public partial class BorrowingSearchViewModel : PageViewModelBase
 // One row of the result list, with the text already prepared for display.
 public class BorrowingRow
 {
+    // From the API (Lab 5)
+    public BorrowingRow(BorrowingDto record)
+    {
+        BorrowingId = record.Id;
+        StudentNumber = record.StudentNumber ?? string.Empty;
+        StudentName = record.StudentName ?? string.Empty;
+        EquipmentIdentifier = record.EquipmentCode ?? string.Empty;
+        EquipmentName = record.EquipmentName ?? string.Empty;
+        CheckedOut = record.BorrowedDate.ToString("MM/dd/yyyy");
+        Due = record.ExpectedReturnDate.ToString("MM/dd/yyyy");
+        Returned = record.ReturnedDate.HasValue ? record.ReturnedDate.Value.ToString("MM/dd/yyyy") : "-";
+        Status = record.Status;
+    }
+
+    // Old constructor, used by the two history pages until they are migrated (removed in the last cleanup step)
     public BorrowingRow(BorrowingRecord record)
     {
         BorrowingId = record.BorrowingId;
