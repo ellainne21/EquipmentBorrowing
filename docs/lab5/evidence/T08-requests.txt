@@ -33,3 +33,5 @@ RESPONSE: HTTP 500
 LOCATION: (none)
 RESULT  : {"code":"outcome_unknown","message":"The connection was lost while saving, so it is not known whether the change was saved. Nothing was retried automatically. Refresh the lists to see the current state before deciding what to do."}
 
+
+NOTE: Step 4b was run from the desktop app after a reset, with EQUIPMENT_BORROWING_FAULT=LostCommit. The API logged the lost commit once (21:39:55). The app showed Result unknown and did not retry. The database showed borrowings 5 and 6 only. The return date (2026-11-11) came from the app's default date field.
