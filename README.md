@@ -905,9 +905,14 @@ Earlier work is preserved. Lab 4 was developed in small commits: the PostgreSQL 
 
 ## Laboratory Activity 5: API Integration and Acceptance Testing
 
-Lab 5 adds an ASP.NET Core REST API (`src/EquipmentBorrowing.Api`) over the existing application services and EF Core / PostgreSQL code. The Avalonia desktop now reads and writes application data only through that API, using asynchronous HTTP.
+Lab 5 adds an ASP.NET Core REST API (`src/EquipmentBorrowing.Api`) over the existing application services and EF Core / PostgreSQL code. The Avalonia desktop now reads and writes application data only through that API, using asynchronous HTTP. The Lab 4 business rules (BR-01 to BR-19) and the use cases UC-01 to UC-09 and UC-12 to UC-16 are unchanged.
 
 ### 1. Architecture
+
+```
+Avalonia desktop  --HTTP/JSON-->  Api  -->  Application services  -->  Infrastructure (EF Core)  -->  PostgreSQL
+(Contracts only)                  (controllers, errors)  (Lab 4 rules)   (repositories, unit of work)
+```
 
 | Project | Role |
 | --- | --- |
@@ -917,6 +922,15 @@ Lab 5 adds an ASP.NET Core REST API (`src/EquipmentBorrowing.Api`) over the exis
 | `EquipmentBorrowing.Contracts` | JSON request and response types shared by the API and the desktop |
 | `EquipmentBorrowing.Api` | REST API (`/api/v1`), error middleware, OpenAPI description |
 | `EquipmentBorrowing.Desktop` | Avalonia UI. References only `Contracts`. Uses `HttpClient` |
+| `tests/EquipmentBorrowing.Tests` | The 51 Lab 4 tests plus 4 Lab 5 tests (55 in total), all passing |
+
+Before and after the boundary change:
+
+| | Lab 4 | Lab 5 |
+| --- | --- | --- |
+| Desktop project references | Application, Infrastructure | Contracts only |
+| Where the DbContext lives | Desktop start-up code | API process only |
+| Where rules and transactions run | Inside the desktop process | Inside the API (same Lab 4 services and unit of work) |
 
 The desktop has no DbContext, no SQL, no Npgsql package and no connection string. To check it:
 
@@ -932,7 +946,7 @@ The only project reference listed must be `EquipmentBorrowing.Contracts`.
 
 ### 3. Secret-free configuration
 
-The API is the only part that connects to PostgreSQL, so the connection strings are stored in .NET user-secrets for the **API** project. They are never stored in the repository. These commands replace the Lab 4 lines that named the Desktop project:
+The API is the only part that connects to PostgreSQL, so the connection strings are stored in .NET user-secrets for the **API** project. They are never stored in the repository. These are the same commands as in Lab 4, section 3, now for the API project:
 
 ```powershell
 dotnet user-secrets set "ConnectionStrings:Main" "Host=localhost;Port=5432;Database=Equipment_BorrowingDB;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Api
@@ -943,9 +957,9 @@ Replace `<your-password>` with your own password. Do not commit it, and do not p
 
 ### 4. Migrations and test data
 
-Migrations live in the Infrastructure project. The API applies pending migrations when it starts (the log says `Database migrations are up to date.`).
+Migrations live in the Infrastructure project. The API applies pending migrations when it starts (the log says `Database migrations are up to date.`). If the database cannot be reached, the API still starts and database routes answer 500 until it can be reached.
 
-To load the controlled test dataset (4 students, 7 equipment items, 4 borrowings), run the API once with the reset option. It works only with the test database and exits when it finishes:
+The API does not add the Lab 4 demo data. A new empty database stays empty. For repeatable tests, load the controlled dataset (4 students, 7 equipment items, 4 borrowings) with the reset option. It works only with the test database (the variable below and a database name that contains "test"), and it exits when it finishes:
 
 ```powershell
 $env:EQUIPMENT_BORROWING_DB="Test"
@@ -953,14 +967,22 @@ $env:EQUIPMENT_BORROWING_FIXED_DATE="2026-11-10"
 dotnet run --project src/EquipmentBorrowing.Api -- --reset-test-data
 ```
 
+To start from a clean test database, drop and recreate it in pgAdmin (one statement at a time), then run the reset command above:
+
+```sql
+DROP DATABASE equipmentborrowing_test WITH (FORCE);
+CREATE DATABASE equipmentborrowing_test;
+```
+
+`dotnet ef` still targets the main database (see Lab 4, section 4).
+
 ### 5. Running the API and the desktop separately
 
-Use two PowerShell windows.
+Use two PowerShell windows opened in the repository folder.
 
 Window 1 (API, test database):
 
 ```powershell
-cd C:\Users\ellai\EquipmentBorrowing
 $env:EQUIPMENT_BORROWING_DB="Test"
 $env:EQUIPMENT_BORROWING_FIXED_DATE="2026-11-10"
 dotnet run --project src/EquipmentBorrowing.Api
@@ -971,9 +993,11 @@ Wait for `Now listening on: http://localhost:5080`. Leave this window running. T
 Window 2 (desktop):
 
 ```powershell
-cd C:\Users\ellai\EquipmentBorrowing
+$env:EQUIPMENT_BORROWING_DB="Test"
 dotnet run --project src/EquipmentBorrowing.Desktop
 ```
+
+The desktop variable only adds `[TEST DATABASE]` to the window title. The API decides which database is used. Without the variable, the desktop starts normally.
 
 The API works without the desktop. Stop both programs before running `dotnet build`, because they lock the build files.
 
@@ -982,36 +1006,39 @@ The API works without the desktop. Stop both programs before running `dotnet bui
 | Variable | Used by | Meaning |
 | --- | --- | --- |
 | `EQUIPMENT_BORROWING_DB=Test` | API | Use the disposable test database |
+| `EQUIPMENT_BORROWING_DB=Test` | Desktop | Add `[TEST DATABASE]` to the window title (label only) |
 | `EQUIPMENT_BORROWING_FIXED_DATE=2026-11-10` | API | Fixed calendar date for repeatable tests (test database only) |
-| `EQUIPMENT_BORROWING_FAULT` | API | Test-only failure: `AfterFirstWrite` (fails after the first item of a checkout, before the commit), `LostCommit` (the commit succeeds, then the connection is "lost"), `BrokenConnection` (database errors). Honoured only with the test database |
+| `EQUIPMENT_BORROWING_FAULT` | API | Test-only failure, honoured only with the test database: `AfterFirstWrite` (fails after the first item of a checkout, before the commit), `LostCommit` (the commit succeeds, then the connection is "lost"), `BrokenConnection` (the database cannot be reached) |
 | `EQUIPMENT_BORROWING_API_URL` | Desktop | API address. Default `http://localhost:5080` |
 
 ### 7. Endpoint contract
 
 All routes start with `/api/v1`. Bodies are JSON. Dates are `YYYY-MM-DD`. Failures use `{ "code": "...", "message": "..." }`.
 
-| ID | Method and route | Success |
-| --- | --- | --- |
-| API-01 | GET `/equipment` (`available`, and optional `search`) | 200 |
-| API-02 | GET `/students` (optional `search`) | 200 |
-| API-03 | GET `/students/{id}` | 200 |
-| API-04 | POST `/students` | 201 + `Location` |
-| API-05 | PUT `/students/{id}` | 200 |
-| API-06 | PATCH `/students/{id}/eligibility` | 200 |
-| API-07 | GET `/equipment/{id}` | 200 |
-| API-08 | POST `/equipment` | 201 + `Location` |
-| API-09 | PUT `/equipment/{id}` | 200 |
-| API-10 | POST `/borrowings` | 201 + `Location` |
-| API-11 | POST `/checkout-requests` (atomic multi-item checkout) | 201 |
-| API-12 | POST `/borrowings/{id}/return` | 200 |
-| API-13 | GET `/borrowings/{id}` | 200 |
-| API-14 | GET `/borrowings` (`search`, `status`, `sort`, `direction`) | 200 |
-| API-15 | GET `/students/{id}/borrowings` | 200 |
-| API-16 | GET `/equipment/{id}/borrowings` | 200 |
+| ID | Method and route | Success | Errors |
+| --- | --- | --- | --- |
+| API-01 | GET `/equipment` (`available`, optional `search`) | 200 | 400 |
+| API-02 | GET `/students` (optional `search`) | 200 | 400 |
+| API-03 | GET `/students/{id}` | 200 | 400, 404 |
+| API-04 | POST `/students` | 201 + `Location` | 400, 409 |
+| API-05 | PUT `/students/{id}` | 200 | 400, 404, 409 |
+| API-06 | PATCH `/students/{id}/eligibility` | 200 (same value is a no-op) | 400, 404 |
+| API-07 | GET `/equipment/{id}` | 200 | 400, 404 |
+| API-08 | POST `/equipment` | 201 + `Location` | 400, 409 |
+| API-09 | PUT `/equipment/{id}` (no `isAvailable`) | 200 | 400, 404, 409 |
+| API-10 | POST `/borrowings` | 201 + `Location` | 400, 404, 409 |
+| API-11 | POST `/checkout-requests` (atomic, 2 to 3 items) | 201 | 400, 404, 409 |
+| API-12 | POST `/borrowings/{id}/return` | 200 | 400, 404, 409 |
+| API-13 | GET `/borrowings/{id}` | 200 | 400, 404 |
+| API-14 | GET `/borrowings` (`search`, `status`, `sort`, `direction`) | 200 | 400 |
+| API-15 | GET `/students/{id}/borrowings` | 200 | 400, 404 |
+| API-16 | GET `/equipment/{id}/borrowings` | 200 | 400, 404 |
 
-Status codes: 400 invalid input, 404 unknown ID or route, 409 business-rule conflict or duplicate, 500 safe server or database error (no stack trace, no credentials). A 500 with the code `outcome_unknown` means a checkout may have been committed but the answer was lost. If the API cannot be reached, there is no HTTP status at all.
-
-Extension: `search` on API-01 is an optional addition to the supplied contract.
+- Error codes: `validation_error`, `not_found`, `method_not_allowed`, `conflict`, `server_error`, `outcome_unknown`. Error bodies never contain credentials or stack traces.
+- Unknown routes return 404 and wrong methods return 405.
+- A field the contract does not define (for example `isAvailable` on an equipment update) is rejected with 400.
+- A 500 with the code `outcome_unknown` means a checkout may have been committed but the answer was lost (BR-18). The client never retries it automatically. If the API cannot be reached, there is no HTTP status at all.
+- Extension: `search` on API-01 is an optional addition to the supplied contract. It keeps the Lab 4 catalog search working.
 
 The machine-readable description is `docs/openapi/openapi-v1.json`. It is generated from the running API:
 
@@ -1032,20 +1059,43 @@ Invoke-Lab5 T02 POST /api/v1/students '{"studentNumber":"ST-500","fullName":"Eli
 
 ### 9. Failure handling in the desktop
 
-The desktop tells the three kinds of failure apart:
+| Situation | What the client receives | What the user sees |
+| --- | --- | --- |
+| API not running | No HTTP response | "No connection: ..." |
+| API running, database broken | HTTP 500 `server_error` | "Server error: ..." with the advice to refresh and try again |
+| Commit answer lost | HTTP 500 `outcome_unknown` | "Result unknown: ..." The app does not retry. The user refreshes the lists to see what was saved |
+| Rule or duplicate rejected | 409 | "Not allowed: ..." (lists refreshed) |
+| Invalid input | 400 | "Check your input: ..." |
 
-- No HTTP response (the API is stopped or unreachable): "No connection".
-- A received 500: "Server error". The message says the change was not saved.
-- A received 500 with `outcome_unknown`: "Result unknown". The app does not retry on its own. The user refreshes the lists to see what was saved.
+All loads are asynchronous, show a loading state, and ignore outdated results. Lists are refreshed from the API after every change.
 
-Validation, not-found and conflict answers (400, 404, 409) are shown as plain messages. Lists are refreshed from the API after every change.
+### 10. Acceptance tests T01 to T08
 
-### 10. Evidence and traceability
+Each test has a request log (`docs/lab5/evidence/T0x-requests.txt`, written by the helper script) and pgAdmin readbacks taken before and after every change. Failures, fixes and retests are in the evidence record.
 
-- Test requests, responses and database readbacks: `docs/lab5/evidence/`.
-- Baseline record, traceability matrix and the T01-T08 results: `docs/lab5/Lab5_Evidence_Record.md`.
-- The authentic Lab 4 submission is tagged `lab4-submitted`. The completed Lab 5 revision is tagged `lab5-submitted`.
+| Test | Subject | Evidence files |
+| --- | --- | --- |
+| T01 | Reads, lists, missing and empty results, OpenAPI | `T01-*` |
+| T02 / T02R | Students and eligibility (the first run lacked some readbacks, so it was repeated as T02R) | `T02-*`, `T02R-*` |
+| T03 | Equipment create, edit, protected state | `T03-*` |
+| T04 / T04R | Single borrow and return (repeated as T04R for missing readbacks) | `T04-*`, `T04R-*` |
+| T05 | Multi-item checkout, limit, rollback after a failed write | `T05-*` |
+| T06 | Histories, search, filter, sort | `T06-*` |
+| T07 | Avalonia over HTTP, refresh after changes, no database code in the desktop | `T07-*` |
+| T08 | API stopped vs 500 vs unknown outcome, recovery | `T08-*` |
 
-### 11. Pair
+### 11. Evidence and traceability
+
+- Baseline record, T01 to T08 results, failures, fixes and retests: `docs/lab5/Lab5_Evidence_Record.md`.
+- Traceability matrix (API, use cases, rules, code and evidence): `docs/lab5/Lab5_Traceability_Matrix.md`.
+- The authentic Lab 4 submission is tagged `lab4-submitted` (commit `6e5dab2`). The completed Lab 5 revision is tagged `lab5-submitted`.
+
+### 12. Known limitations
+
+- No authentication, Docker or cloud deployment (not required for this lab).
+- The acceptance tests ran against the disposable test database only.
+- The error banner on the Students page can overlap the Retry button. This is cosmetic.
+
+### 13. Pair
 
 Ellainne G. Cabasag (2023304057) and Floramay S. Balofinos (2024302506).
