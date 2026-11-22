@@ -90,3 +90,61 @@ RESPONSE: HTTP 200
 LOCATION: (none)
 RESULT  : {"id":2,"equipmentCode":"EQ-002","name":"Laptop","description":null,"isAvailable":true}
 
+[2026-11-22 21:18:39] T04R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":2,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Not available: EQ-002 (Laptop). Nothing was checked out."}
+
+[2026-11-22 21:18:39] T04R
+REQUEST : GET /api/v1/borrowings/5
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":5,"studentId":1,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-002","equipmentName":"Laptop"}
+
+[2026-11-22 21:18:53] T04R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":2,"equipmentId":6,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Ben Diaz is not allowed to borrow right now. Nothing was checked out."}
+
+[2026-11-22 21:18:53] T04R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":1,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 201
+LOCATION: http://localhost:5080/api/v1/borrowings/6
+RESULT  : {"id":6,"studentId":4,"equipmentId":1,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-400","studentName":"Dani Ong","equipmentCode":"EQ-001","equipmentName":"Camera"}
+
+[2026-11-22 21:18:53] T04R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":9999,"equipmentId":6,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 404
+LOCATION: (none)
+RESULT  : {"code":"not_found","message":"The student was not found."}
+
+[2026-11-22 21:18:53] T04R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":9999,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 404
+LOCATION: (none)
+RESULT  : {"code":"not_found","message":"The equipment item was not found."}
+
+[2026-11-22 21:18:53] T04R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":6,"expectedReturnDate":"2026-11-10"}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"expectedReturnDate must be later than the checkout date (2026-11-10)."}
+
+[2026-11-22 21:18:54] T04R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":4,"equipmentId":6,"expectedReturnDate":"2026-13-45"}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"The request is not valid. Check the JSON field names, the value types and the date format (YYYY-MM-DD)."}
+
+
+NOTE: The T04R acceptance run is the first part of this file (2026-11-22 17:37 to 17:44), including the restart reads at 17:44:26. The requests at 21:18 are an accidental re-run of the same script. The dataset had not been reset, because the T02R2 run had returned EQ-001 and issued EQ-002 to student 1. The results therefore differ (409 for the checkout, 201 for the EQ-001 request) and are not part of the T04R result. That run changed the disposable test database, which was reset before the next test.
