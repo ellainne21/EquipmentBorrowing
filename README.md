@@ -700,6 +700,8 @@ AppDbContext → SQLite database
 
 ## Laboratory Activity 4: PostgreSQL, Multi-Item Checkout and Histories
 
+> Lab 5 update: the API now owns the database connection. Where this section says to set user-secrets on the Desktop project, or to start the desktop with the test settings, use the Lab 5 section at the end of this file instead. The secrets belong to `src/EquipmentBorrowing.Api`, and the API reads `EQUIPMENT_BORROWING_DB`, `EQUIPMENT_BORROWING_FIXED_DATE` and `EQUIPMENT_BORROWING_FAULT`.
+
 **Pair:** Ellainne G. Cabasag (2023304057) and Floramay S. Balofinos (2024302506) 
 
 Lab 4 continues the same application. Lab 3 stored data in SQLite. Lab 4 replaces SQLite with
@@ -761,8 +763,8 @@ and `Lab4_Traceability_Matrix.docx`. Test evidence is in `docs/evidence/`.
    Replace `<your-password>` with your own PostgreSQL password:
 
    ```powershell
-   dotnet user-secrets set "ConnectionStrings:Main" "Host=localhost;Port=5432;Database=Equipment_BorrowingDB;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Desktop
-   dotnet user-secrets set "ConnectionStrings:Test" "Host=localhost;Port=5432;Database=equipmentborrowing_test;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Desktop
+   dotnet user-secrets set "ConnectionStrings:Main" "Host=localhost;Port=5432;Database=Equipment_BorrowingDB;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Api
+   dotnet user-secrets set "ConnectionStrings:Test" "Host=localhost;Port=5432;Database=equipmentborrowing_test;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Api
    ```
 
    `DatabaseSettings` reads these keys. If one is missing, the application stops and prints the exact command to set it.
@@ -899,3 +901,151 @@ Search, filter and sort (BR-17) run **in PostgreSQL**, not in memory. The borrow
 ### 11. Git history
 
 Earlier work is preserved. Lab 4 was developed in small commits: the PostgreSQL switch, the domain and database rules, transactional checkout and return, each page, the tests and the documents. Use `git log --oneline` to see it.
+
+
+## Laboratory Activity 5: API Integration and Acceptance Testing
+
+Lab 5 adds an ASP.NET Core REST API (`src/EquipmentBorrowing.Api`) over the existing application services and EF Core / PostgreSQL code. The Avalonia desktop now reads and writes application data only through that API, using asynchronous HTTP.
+
+### 1. Architecture
+
+| Project | Role |
+| --- | --- |
+| `EquipmentBorrowing.Domain` | Entities and business rules |
+| `EquipmentBorrowing.Application` | Use-case services and repository interfaces |
+| `EquipmentBorrowing.Infrastructure` | EF Core, PostgreSQL, migrations, test seams |
+| `EquipmentBorrowing.Contracts` | JSON request and response types shared by the API and the desktop |
+| `EquipmentBorrowing.Api` | REST API (`/api/v1`), error middleware, OpenAPI description |
+| `EquipmentBorrowing.Desktop` | Avalonia UI. References only `Contracts`. Uses `HttpClient` |
+
+The desktop has no DbContext, no SQL, no Npgsql package and no connection string. To check it:
+
+```powershell
+dotnet list src\EquipmentBorrowing.Desktop reference
+```
+
+The only project reference listed must be `EquipmentBorrowing.Contracts`.
+
+### 2. Prerequisites
+
+.NET 10 SDK and PostgreSQL, with two databases: `Equipment_BorrowingDB` (the real data) and `equipmentborrowing_test` (a disposable database used for all Lab 5 tests). See Lab 4, sections 2 and 3, for installing PostgreSQL and creating the databases. No Docker, cloud service or authentication is needed.
+
+### 3. Secret-free configuration
+
+The API is the only part that connects to PostgreSQL, so the connection strings are stored in .NET user-secrets for the **API** project. They are never stored in the repository. These commands replace the Lab 4 lines that named the Desktop project:
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:Main" "Host=localhost;Port=5432;Database=Equipment_BorrowingDB;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Api
+dotnet user-secrets set "ConnectionStrings:Test" "Host=localhost;Port=5432;Database=equipmentborrowing_test;Username=postgres;Password=<your-password>" --project src/EquipmentBorrowing.Api
+```
+
+Replace `<your-password>` with your own password. Do not commit it, and do not paste it into screenshots or logs.
+
+### 4. Migrations and test data
+
+Migrations live in the Infrastructure project. The API applies pending migrations when it starts (the log says `Database migrations are up to date.`).
+
+To load the controlled test dataset (4 students, 7 equipment items, 4 borrowings), run the API once with the reset option. It works only with the test database and exits when it finishes:
+
+```powershell
+$env:EQUIPMENT_BORROWING_DB="Test"
+$env:EQUIPMENT_BORROWING_FIXED_DATE="2026-11-10"
+dotnet run --project src/EquipmentBorrowing.Api -- --reset-test-data
+```
+
+### 5. Running the API and the desktop separately
+
+Use two PowerShell windows.
+
+Window 1 (API, test database):
+
+```powershell
+cd C:\Users\ellai\EquipmentBorrowing
+$env:EQUIPMENT_BORROWING_DB="Test"
+$env:EQUIPMENT_BORROWING_FIXED_DATE="2026-11-10"
+dotnet run --project src/EquipmentBorrowing.Api
+```
+
+Wait for `Now listening on: http://localhost:5080`. Leave this window running. To use the real database, start the API without these two variables.
+
+Window 2 (desktop):
+
+```powershell
+cd C:\Users\ellai\EquipmentBorrowing
+dotnet run --project src/EquipmentBorrowing.Desktop
+```
+
+The API works without the desktop. Stop both programs before running `dotnet build`, because they lock the build files.
+
+### 6. Environment variables
+
+| Variable | Used by | Meaning |
+| --- | --- | --- |
+| `EQUIPMENT_BORROWING_DB=Test` | API | Use the disposable test database |
+| `EQUIPMENT_BORROWING_FIXED_DATE=2026-11-10` | API | Fixed calendar date for repeatable tests (test database only) |
+| `EQUIPMENT_BORROWING_FAULT` | API | Test-only failure: `AfterFirstWrite` (fails after the first item of a checkout, before the commit), `LostCommit` (the commit succeeds, then the connection is "lost"), `BrokenConnection` (database errors). Honoured only with the test database |
+| `EQUIPMENT_BORROWING_API_URL` | Desktop | API address. Default `http://localhost:5080` |
+
+### 7. Endpoint contract
+
+All routes start with `/api/v1`. Bodies are JSON. Dates are `YYYY-MM-DD`. Failures use `{ "code": "...", "message": "..." }`.
+
+| ID | Method and route | Success |
+| --- | --- | --- |
+| API-01 | GET `/equipment` (`available`, and optional `search`) | 200 |
+| API-02 | GET `/students` (optional `search`) | 200 |
+| API-03 | GET `/students/{id}` | 200 |
+| API-04 | POST `/students` | 201 + `Location` |
+| API-05 | PUT `/students/{id}` | 200 |
+| API-06 | PATCH `/students/{id}/eligibility` | 200 |
+| API-07 | GET `/equipment/{id}` | 200 |
+| API-08 | POST `/equipment` | 201 + `Location` |
+| API-09 | PUT `/equipment/{id}` | 200 |
+| API-10 | POST `/borrowings` | 201 + `Location` |
+| API-11 | POST `/checkout-requests` (atomic multi-item checkout) | 201 |
+| API-12 | POST `/borrowings/{id}/return` | 200 |
+| API-13 | GET `/borrowings/{id}` | 200 |
+| API-14 | GET `/borrowings` (`search`, `status`, `sort`, `direction`) | 200 |
+| API-15 | GET `/students/{id}/borrowings` | 200 |
+| API-16 | GET `/equipment/{id}/borrowings` | 200 |
+
+Status codes: 400 invalid input, 404 unknown ID or route, 409 business-rule conflict or duplicate, 500 safe server or database error (no stack trace, no credentials). A 500 with the code `outcome_unknown` means a checkout may have been committed but the answer was lost. If the API cannot be reached, there is no HTTP status at all.
+
+Extension: `search` on API-01 is an optional addition to the supplied contract.
+
+The machine-readable description is `docs/openapi/openapi-v1.json`. It is generated from the running API:
+
+```powershell
+curl.exe -s -o docs\openapi\openapi-v1.json http://localhost:5080/openapi/v1.json
+```
+
+### 8. Trying the endpoints
+
+`scripts\Invoke-Lab5.ps1` sends a request to `http://localhost:5080`, prints the status and the body, and appends them to `docs\lab5\evidence\<label>-requests.txt`.
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+. .\scripts\Invoke-Lab5.ps1
+Invoke-Lab5 T01 GET /api/v1/students
+Invoke-Lab5 T02 POST /api/v1/students '{"studentNumber":"ST-500","fullName":"Eli Tan","contact":null}'
+```
+
+### 9. Failure handling in the desktop
+
+The desktop tells the three kinds of failure apart:
+
+- No HTTP response (the API is stopped or unreachable): "No connection".
+- A received 500: "Server error". The message says the change was not saved.
+- A received 500 with `outcome_unknown`: "Result unknown". The app does not retry on its own. The user refreshes the lists to see what was saved.
+
+Validation, not-found and conflict answers (400, 404, 409) are shown as plain messages. Lists are refreshed from the API after every change.
+
+### 10. Evidence and traceability
+
+- Test requests, responses and database readbacks: `docs/lab5/evidence/`.
+- Baseline record, traceability matrix and the T01-T08 results: `docs/lab5/Lab5_Evidence_Record.md`.
+- The authentic Lab 4 submission is tagged `lab4-submitted`. The completed Lab 5 revision is tagged `lab5-submitted`.
+
+### 11. Pair
+
+Ellainne G. Cabasag (2023304057) and Floramay S. Balofinos (2024302506).
