@@ -1,0 +1,22 @@
+﻿T01 step 4: OpenAPI description compared with API-01 to API-16
+Source: docs/openapi/openapi-v1.json, downloaded from http://localhost:5080/openapi/v1.json (OpenAPI 3.1.1, EquipmentBorrowing.Api | v1)
+
+API-01  GET /api/v1/equipment                            present, responses 200,400,500
+API-02  GET /api/v1/students                             present, responses 200,400,500
+API-03  GET /api/v1/students/{id}                        present, responses 200,400,404,500
+API-04  POST /api/v1/students                            present, responses 201,400,409,500
+API-05  PUT /api/v1/students/{id}                        present, responses 200,400,404,409,500
+API-06  PATCH /api/v1/students/{id}/eligibility          present, responses 200,400,404,500
+API-07  GET /api/v1/equipment/{id}                       present, responses 200,400,404,500
+API-08  POST /api/v1/equipment                           present, responses 201,400,409,500
+API-09  PUT /api/v1/equipment/{id}                       present, responses 200,400,404,409,500
+API-10  POST /api/v1/borrowings                          present, responses 201,400,404,409,500
+API-11  POST /api/v1/checkout-requests                   present, responses 201,400,404,409,500
+API-12  POST /api/v1/borrowings/{id}/return              present, responses 200,400,404,409,500
+API-13  GET /api/v1/borrowings/{id}                      present, responses 200,400,404,500
+API-14  GET /api/v1/borrowings                           present, responses 200,400,500
+API-15  GET /api/v1/students/{id}/borrowings             present, responses 200,400,404,500
+API-16  GET /api/v1/equipment/{id}/borrowings            present, responses 200,400,404,500
+
+Operations in the file: 16. Expected: 16. Extra operations: 0.
+Schemas: BorrowingDto, CheckoutRequest, CheckoutResponse, CreateBorrowingRequest, CreateEquipmentRequest, CreateStudentRequest, EquipmentDto, ErrorResponse, ReturnBorrowingRequest, SetEligibilityRequest, StudentDto, UpdateEquipmentRequest, UpdateStudentRequest
