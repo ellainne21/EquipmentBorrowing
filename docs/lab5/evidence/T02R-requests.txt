@@ -1,0 +1,84 @@
+﻿[2026-11-22 17:48:53] T02R
+REQUEST : POST /api/v1/students
+BODY    : {"studentNumber":"ST-500","fullName":"Eli Tan","contact":null}
+RESPONSE: HTTP 201
+LOCATION: http://localhost:5080/api/v1/students/5
+RESULT  : {"id":5,"studentNumber":"ST-500","fullName":"Eli Tan","contact":null,"isEligible":true}
+
+[2026-11-22 17:48:53] T02R
+REQUEST : GET /api/v1/students/5
+BODY    : (none)
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":5,"studentNumber":"ST-500","fullName":"Eli Tan","contact":null,"isEligible":true}
+
+[2026-11-22 17:48:53] T02R
+REQUEST : PUT /api/v1/students/5
+BODY    : {"studentNumber":"ST-500","fullName":"Eli M. Tan","contact":"09171234567"}
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":5,"studentNumber":"ST-500","fullName":"Eli M. Tan","contact":"09171234567","isEligible":true}
+
+[2026-11-22 17:48:54] T02R
+REQUEST : POST /api/v1/students
+BODY    : {"studentNumber":"ST-600","fullName":"   ","contact":null}
+RESPONSE: HTTP 400
+LOCATION: (none)
+RESULT  : {"code":"validation_error","message":"Full name is required."}
+
+[2026-11-22 17:48:54] T02R
+REQUEST : POST /api/v1/students
+BODY    : {"studentNumber":" st-100 ","fullName":"Duplicate Person"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Student number 'st-100' is already registered."}
+
+[2026-11-22 17:48:54] T02R
+REQUEST : PUT /api/v1/students/5
+BODY    : {"studentNumber":"ST-100","fullName":"Eli M. Tan","contact":null}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Student number 'ST-100' belongs to another student."}
+
+[2026-11-22 17:50:13] T02R
+REQUEST : PATCH /api/v1/students/1/eligibility
+BODY    : {"isEligible":false}
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":1,"studentNumber":"ST-100","fullName":"Ada Cruz","contact":null,"isEligible":false}
+
+[2026-11-22 17:50:13] T02R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":1,"equipmentId":2,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 409
+LOCATION: (none)
+RESULT  : {"code":"conflict","message":"Ada Cruz is not allowed to borrow right now. Nothing was checked out."}
+
+[2026-11-22 17:52:40] T02R
+REQUEST : POST /api/v1/borrowings/1/return
+BODY    : {}
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":1,"studentId":1,"equipmentId":1,"borrowedDate":"2026-11-01","expectedReturnDate":"2026-11-09","returnedDate":"2026-11-10","status":"Returned","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-001","equipmentName":"Camera"}
+
+[2026-11-22 17:52:40] T02R
+REQUEST : PATCH /api/v1/students/1/eligibility
+BODY    : {"isEligible":true}
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":1,"studentNumber":"ST-100","fullName":"Ada Cruz","contact":null,"isEligible":true}
+
+[2026-11-22 17:52:41] T02R
+REQUEST : POST /api/v1/borrowings
+BODY    : {"studentId":1,"equipmentId":2,"expectedReturnDate":"2026-11-12"}
+RESPONSE: HTTP 201
+LOCATION: http://localhost:5080/api/v1/borrowings/5
+RESULT  : {"id":5,"studentId":1,"equipmentId":2,"borrowedDate":"2026-11-10","expectedReturnDate":"2026-11-12","returnedDate":null,"status":"Active","studentNumber":"ST-100","studentName":"Ada Cruz","equipmentCode":"EQ-002","equipmentName":"Laptop"}
+
+[2026-11-22 17:52:41] T02R
+REQUEST : PATCH /api/v1/students/1/eligibility
+BODY    : {"isEligible":true}
+RESPONSE: HTTP 200
+LOCATION: (none)
+RESULT  : {"id":1,"studentNumber":"ST-100","fullName":"Ada Cruz","contact":null,"isEligible":true}
+
