@@ -15,7 +15,7 @@ public sealed record BorrowingRow(
     string? StudentNumber, string? StudentName, string? EquipmentCode, string? EquipmentName);
 
 // One HTTP response: status code plus raw body, so a test can assert both the status and the error code.
-public sealed record ApiResult(HttpStatusCode Status, string Body)
+public sealed record ApiResult(HttpStatusCode Status, string Body, Uri? Location = null)
 {
     public T Json<T>() => JsonSerializer.Deserialize<T>(Body, JsonSerializerOptions.Web)!;
 
@@ -45,7 +45,15 @@ public static class HttpClientExtensions
     public static async Task<ApiResult> FetchAsync(this HttpClient client, string url)
     {
         using var response = await client.GetAsync(url);
-        return new ApiResult(response.StatusCode, await response.Content.ReadAsStringAsync());
+        return new ApiResult(response.StatusCode, await response.Content.ReadAsStringAsync(), response.Headers.Location);
+    }
+
+    // POST / PUT / PATCH with a JSON body (camelCase, same as the API contract).
+    public static async Task<ApiResult> SendJsonAsync(this HttpClient client, HttpMethod method, string url, object body)
+    {
+        using var request = new HttpRequestMessage(method, url) { Content = System.Net.Http.Json.JsonContent.Create(body) };
+        using var response = await client.SendAsync(request);
+        return new ApiResult(response.StatusCode, await response.Content.ReadAsStringAsync(), response.Headers.Location);
     }
 
     // Borrowing IDs keyed by equipment code (EQ-001 ...), resolved from the API, never hard-coded.
@@ -60,6 +68,15 @@ public static class HttpClientExtensions
 // snapshots to prove "No changes" in the database, including unrelated rows.
 public static class DbSnapshot
 {
+    // One table, optionally leaving out one row by Id (used to prove that "everything except the changed row" is untouched).
+    public static async Task<string> TableAsync(string table, params int[] excludeIds)
+    {
+        var rows = excludeIds.Length == 0
+            ? await Pg.RowsAsync($"SELECT * FROM \"{table}\" ORDER BY \"Id\"")
+            : await Pg.RowsAsync($"SELECT * FROM \"{table}\" WHERE NOT (\"Id\" = ANY(@x)) ORDER BY \"Id\"", ("x", excludeIds));
+        return string.Join("\n", rows.Select(r => string.Join("|", r.Select(kv => $"{kv.Key}={kv.Value}"))));
+    }
+
     public static async Task<string> TakeAsync()
     {
         var sb = new StringBuilder();
