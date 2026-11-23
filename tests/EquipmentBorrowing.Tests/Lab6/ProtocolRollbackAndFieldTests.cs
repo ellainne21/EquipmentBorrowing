@@ -164,7 +164,22 @@ public sealed class RecordingInjector : ICheckoutFaultInjector
         }
     }
 
-    public Task AfterCommitAsync(CancellationToken cancellationToken = default) => _inner.AfterCommitAsync(cancellationToken);
+    public int AfterCommitCalls { get; private set; }
+    public int AfterCommitFaults { get; private set; }
+
+    public async Task AfterCommitAsync(CancellationToken cancellationToken = default)
+    {
+        AfterCommitCalls++;
+        try
+        {
+            await _inner.AfterCommitAsync(cancellationToken);
+        }
+        catch
+        {
+            AfterCommitFaults++;
+            throw;
+        }
+    }
 }
 
 // A separate real API host (same pipeline, same disposable test database) with only the fault injector replaced.
