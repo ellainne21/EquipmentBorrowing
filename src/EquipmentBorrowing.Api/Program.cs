@@ -160,3 +160,7 @@ app.MapControllers();
 
 app.Run();
 return 0;
+
+// Lab 6 (disclosed change, no behaviour change): makes the entry point visible to
+// WebApplicationFactory<Program> so the xUnit integration tests can start the real API pipeline.
+public partial class Program { }
