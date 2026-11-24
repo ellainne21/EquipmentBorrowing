@@ -1,5 +1,7 @@
 # ITSD81 Laboratory Activity 6 — Traceability, Execution and Defect Record
 
+**Pair:** Ellainne G. Cabasag (2023304057) and Floramay S. Balofinos (2024302506). Each partner submits individually with both names and IDs.
+
 Authors: *<full names and student IDs of both partners, or your own>*
 
 All results below come from real runs of `dotnet test` against the disposable PostgreSQL test database with fixed date
@@ -26,7 +28,7 @@ Existing test seams (Lab 4/5, used as-is, active only with `EQUIPMENT_BORROWING_
 ## 2. Requirements traceability matrix (UC → BR → API → TC6 → actual test → result → evidence)
 
 Test classes are in `tests/EquipmentBorrowing.Tests/Lab6/`; method names are listed in `docs/lab6/evidence/lab6-test-list.txt` (`dotnet test --list-tests`).
-All results are **Passed** in the 228/228 run dated *<run date from the output>*.
+All results are **Passed** in the 228/228 run dated 2026-11-24 (creation time stored in docs/lab6/evidence/lab6.trx).
 
 | UC | BR | API | TC6 | Actual test implementation | Execution result | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -110,10 +112,10 @@ rather than hidden. Environment for all: Windows, .NET SDK 10.0.401, net10.0, di
 
 | ID | Affected | Expected vs observed | Likely layer and diagnosis | Correction | Retest and regression |
 | --- | --- | --- | --- | --- | --- |
-| L6-01 *(date: fill in)* | TC6-U02; UC-02; BR-10; API-01 | Test expected `available=false` to return only borrowed items; observed all seven | Test design. `EquipmentController`/`EquipmentQueryService`/`EfEquipmentRepository`: API-01 is "all items, or only available ones with `available=true`"; `false` is not a filter. The Lab 6 suite requires only `available=true`. | Replaced with a labeled characterization test (`Available_false_is_not_a_filter...`); required U02 assertions unchanged | `dotnet test`: 104/104, later 228/228 |
-| L6-02 *(date: fill in)* | TC6-E01 (database integrity); UC-12/15; BR-14, BR-16 | Expected SQLSTATE 23503 on deleting a student/item with history; observed 23001, delete refused, database unchanged | Test design. `AppDbContext` uses `DeleteBehavior.Restrict` (`ON DELETE RESTRICT`), which PostgreSQL reports as 23001 (23503 is for `NO ACTION`) | Assert 23001; the snapshot-unchanged assertion kept | 146/146, later 228/228 |
-| L6-03 *(date: fill in)* | TC6-E07 client side; UC-06; BR-18; API-11 | Expected client message to contain "no changes were made" (written from memory); observed a different, generic-sounding message | Test code first. Lab 5 evidence shows the server's broken-connection messages differ. Revised test compares the client's message with the server's own message for the same request: **identical**, so the client handles it correctly. | Compare with the server's actual message instead of a hard-coded phrase | The E07b client test passes; 228/228 |
-| L6-04 *(date: fill in)* | Infrastructure smoke test (not a TC6 case) | Date columns read as dates; observed `InvalidCastException`, `DateOnly` to `DateTime` | Test code. Npgsql maps PostgreSQL `date` to `DateOnly` | Compare as `DateOnly` | 60/60 at that stage, later 228/228 |
+| L6-01 (2026-11-23; corrected test in commit 02e09d8) | TC6-U02; UC-02; BR-10; API-01 | Test expected `available=false` to return only borrowed items; observed all seven | Test design. `EquipmentController`/`EquipmentQueryService`/`EfEquipmentRepository`: API-01 is "all items, or only available ones with `available=true`"; `false` is not a filter. The Lab 6 suite requires only `available=true`. | Replaced with a labeled characterization test (`Available_false_is_not_a_filter...`); required U02 assertions unchanged | `dotnet test`: 104/104, later 228/228 |
+| L6-02 (2026-11-24; corrected test in commit 9fdabf2) | TC6-E01 (database integrity); UC-12/15; BR-14, BR-16 | Expected SQLSTATE 23503 on deleting a student/item with history; observed 23001, delete refused, database unchanged | Test design. `AppDbContext` uses `DeleteBehavior.Restrict` (`ON DELETE RESTRICT`), which PostgreSQL reports as 23001 (23503 is for `NO ACTION`) | Assert 23001; the snapshot-unchanged assertion kept | 146/146, later 228/228 |
+| L6-03 (2026-11-24; corrected test in commit 20d4577) | TC6-E07 client side; UC-06; BR-18; API-11 | Expected client message to contain "no changes were made" (written from memory); observed a different, generic-sounding message | Test code first. Lab 5 evidence shows the server's broken-connection messages differ. Revised test compares the client's message with the server's own message for the same request: **identical**, so the client handles it correctly. | Compare with the server's actual message instead of a hard-coded phrase | The E07b client test passes; 228/228 |
+| L6-04 (2026-11-23; corrected test in commit 9ac182b) | Infrastructure smoke test (not a TC6 case) | Date columns read as dates; observed `InvalidCastException`, `DateOnly` to `DateTime` | Test code. Npgsql maps PostgreSQL `date` to `DateOnly` | Compare as `DateOnly` | 60/60 at that stage, later 228/228 |
 
 Evidence locations: `docs/lab6/evidence/lab6-test-output.txt` (console output of the full run), `lab6.trx`, `lab6-test-list.txt`, `E08-restart-pids.txt` (E08 process IDs, copied unchanged from `lab6.trx`); per-failure console output is kept in the
 terminal logs *<attach if retained>*. Fresh PostgreSQL readbacks are performed inside the tests themselves (non-pooled connections), so the assertions are the readback evidence.
