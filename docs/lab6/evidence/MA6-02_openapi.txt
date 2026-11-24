@@ -1,0 +1,4 @@
+﻿MA6-02 OpenAPI comparison, API running alone (no desktop process), test database, D = 2026-11-10
+Live: GET http://localhost:5080/openapi/v1.json  vs  committed: docs/openapi/openapi-v1.json
+Identical content: True
+Live operations: 16 (expected 16)
