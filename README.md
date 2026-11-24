@@ -820,7 +820,7 @@ The "key" columns hold the trimmed, upper-case text. The application uses the sa
 
 ```powershell
 dotnet run --project src/EquipmentBorrowing.Desktop     # main database
-dotnet test                                             # 51 automated tests, no database needed
+dotnet test                                             # Lab 4 tests need no database; the Lab 6 tests (see the Lab 6 section) need the PostgreSQL test database
 ```
 
 To use the **disposable test database**, set an environment variable first. The window title then shows **[TEST DATABASE]**:
@@ -922,7 +922,7 @@ Avalonia desktop  --HTTP/JSON-->  Api  -->  Application services  -->  Infrastru
 | `EquipmentBorrowing.Contracts` | JSON request and response types shared by the API and the desktop |
 | `EquipmentBorrowing.Api` | REST API (`/api/v1`), error middleware, OpenAPI description |
 | `EquipmentBorrowing.Desktop` | Avalonia UI. References only `Contracts`. Uses `HttpClient` |
-| `tests/EquipmentBorrowing.Tests` | The 51 Lab 4 tests plus 4 Lab 5 tests (55 in total), all passing |
+| `tests/EquipmentBorrowing.Tests` | The 51 Lab 4 tests plus 4 Lab 5 tests (55 in total), all passing at Lab 5. Lab 6 adds more tests to this project (see the Lab 6 section) |
 
 Before and after the boundary change:
 
