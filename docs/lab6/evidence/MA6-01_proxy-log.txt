@@ -1,0 +1,41 @@
+﻿MA6-01 Part A: delayed HTTP response (6 seconds), proxy console output
+Source: scripts/DelayProxy.cs run as: dotnet run scripts/DelayProxy.cs -- 6
+Desktop started with EQUIPMENT_BORROWING_API_URL=http://localhost:5081 (proxy), API on http://localhost:5080, test database, D = 2026-11-10.
+Copied unchanged from the proxy terminal window. The last number on each "Request finished" line is the time in milliseconds.
+
+Restore succeeded with 1 warning(s) in 12.5s
+    C:\Users\ellai\EquipmentBorrowing\scripts\DelayProxy.cs.csproj : warning NU1903: Package 'Microsoft.DotNet.ILCompiler' 10.0.12 has a known high severity vulnerability, https://github.com/advisories/GHSA-p3jp-9v83-76w9
+  DelayProxy.cs net10.0 succeeded with 1 warning(s) (2.7s)
+    C:\Users\ellai\EquipmentBorrowing\scripts\DelayProxy.cs.csproj : warning NU1903: Package 'Microsoft.DotNet.ILCompiler' 10.0.12 has a known high severity vulnerability, https://github.com/advisories/GHSA-p3jp-9v83-76w9
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5081
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\ellai\EquipmentBorrowing\scripts
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5081/api/v1/equipment - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5081/api/v1/equipment - 200 - application/json;+charset=utf-8 7303.9324ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5081/api/v1/students - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5081/api/v1/students - 200 - application/json;+charset=utf-8 6281.7876ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5081/api/v1/equipment - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5081/api/v1/equipment - 200 - application/json;+charset=utf-8 6029.8289ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5081/api/v1/students - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5081/api/v1/students - 200 - application/json;+charset=utf-8 6010.6530ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5081/api/v1/borrowings?status=Active&sort=expectedReturnDate&direction=asc - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5081/api/v1/borrowings?status=Active&sort=expectedReturnDate&direction=asc - 200 - application/json;+charset=utf-8 6281.6454ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5081/api/v1/borrowings?status=Active&sort=expectedReturnDate&direction=asc - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5081/api/v1/borrowings?status=Active&sort=expectedReturnDate&direction=asc - 200 - application/json;+charset=utf-8 6139.6035ms
