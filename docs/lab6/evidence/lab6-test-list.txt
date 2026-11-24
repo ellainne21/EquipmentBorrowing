@@ -1,0 +1,238 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  EquipmentBorrowing.Contracts -> C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Contracts\bin\Debug\net10.0\EquipmentBorrowing.Contracts.dll
+  EquipmentBorrowing.Domain -> C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Domain\bin\Debug\net10.0\EquipmentBorrowing.Domain.dll
+  EquipmentBorrowing.Application -> C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Application\bin\Debug\net10.0\EquipmentBorrowing.Application.dll
+  EquipmentBorrowing.Infrastructure -> C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Infrastructure\bin\Debug\net10.0\EquipmentBorrowing.Infrastructure.dll
+  EquipmentBorrowing.Api -> C:\Users\ellai\EquipmentBorrowing\src\EquipmentBorrowing.Api\bin\Debug\net10.0\EquipmentBorrowing.Api.dll
+  EquipmentBorrowing.Tests -> C:\Users\ellai\EquipmentBorrowing\tests\EquipmentBorrowing.Tests\bin\Debug\net10.0\EquipmentBorrowing.Tests.dll
+Test run for C:\Users\ellai\EquipmentBorrowing\tests\EquipmentBorrowing.Tests\bin\Debug\net10.0\EquipmentBorrowing.Tests.dll (.NETCoreApp,Version=v10.0)
+The following Tests are available:
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_TwoAvailableItems_SavesBothBorrowingsAndMarksBothUnavailable
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_ThreeItems_ExactlyAtTheLimit_IsAllowed
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_StudentWithOneActiveItem_TwoMoreReachTheLimitExactly_IsAllowed
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_OnlyOneItem_IsRejected_BR12
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_NoItems_IsRejected_BR12
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_DuplicateItem_IsRejectedAndNeverSilentlyFixed_BR12
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_FourItemsAtOnce_IsRejected_BR09
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_ActiveItemsPlusRequestedItemsExceedTheLimit_IsRejected_BR09
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_RestrictedStudent_IsRejected_BR04
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_OneUnavailableItem_RejectsTheWholeCheckout_AllOrNothing
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_ItemWithAnActiveBorrowing_IsRejectedEvenIfItsAvailableFlagIsTrue_BR10
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_ExpectedReturnDateNotAfterToday_IsRejected_BR11(daysFromToday: 0)
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_ExpectedReturnDateNotAfterToday_IsRejected_BR11(daysFromToday: -3)
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_StudentThatNoLongerExists_IsRejected_BR08
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_ItemThatNoLongerExists_IsRejected_BR08
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_WriteFailsAfterTheFirstItem_RollsBackEverything
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_DatabaseCannotBeReached_FailsAndChangesNothing
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_WriteFails_MessageDoesNotLeakTechnicalDetails_BR18
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_DatabaseRefusesTheWrite_ConcurrentChange_IsRejectedAndNothingIsKept
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_CommitFails_OutcomeIsUnknown_NotSuccess
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_ConnectionLostAfterCommitWasAccepted_ReportsUnknown_ButTheDataIsSaved
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Multi_RetryAfterAnUnknownOutcome_DoesNotCreateDuplicates
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Single_AvailableItem_IsCheckedOut
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Single_UnavailableItem_IsRejected
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Single_RestrictedStudent_IsRejected
+    EquipmentBorrowing.Tests.CheckoutRuleTests.Single_StudentAlreadyAtTheLimit_IsRejected_BR09
+    EquipmentBorrowing.Tests.DomainTests.NewStudent_IsEligible_AndTheNumberIsTrimmedWithAnUppercaseKey_BR01_BR02
+    EquipmentBorrowing.Tests.DomainTests.Student_BlankNumberOrName_IsRejected(number: "", name: "Ella")
+    EquipmentBorrowing.Tests.DomainTests.Student_BlankNumberOrName_IsRejected(number: "   ", name: "Ella")
+    EquipmentBorrowing.Tests.DomainTests.Student_BlankNumberOrName_IsRejected(number: "2026-0001", name: "")
+    EquipmentBorrowing.Tests.DomainTests.Student_BlankNumberOrName_IsRejected(number: "2026-0001", name: "   ")
+    EquipmentBorrowing.Tests.DomainTests.Student_BlankContactClearsTheContact_BR03
+    EquipmentBorrowing.Tests.DomainTests.Student_EligibilityCanBeChangedBothWays_BR04
+    EquipmentBorrowing.Tests.DomainTests.NewEquipment_IsAvailable_AndTheIdentifierHasAnUppercaseKey_BR05_BR06
+    EquipmentBorrowing.Tests.DomainTests.Equipment_BlankIdentifierOrName_IsRejected(identifier: "", name: "Laptop")
+    EquipmentBorrowing.Tests.DomainTests.Equipment_BlankIdentifierOrName_IsRejected(identifier: "LAP-001", name: "  ")
+    EquipmentBorrowing.Tests.DomainTests.Equipment_UpdatingDetails_DoesNotChangeAvailability_BR07
+    EquipmentBorrowing.Tests.DomainTests.Equipment_BorrowAndReturn_ChangeAvailability
+    EquipmentBorrowing.Tests.DomainTests.NewBorrowing_IsActive_AndStoresCalendarDatesOnly
+    EquipmentBorrowing.Tests.DomainTests.Borrowing_ExpectedReturnDateMustBeAfterCheckout_BR11(daysAfterCheckout: 0)
+    EquipmentBorrowing.Tests.DomainTests.Borrowing_ExpectedReturnDateMustBeAfterCheckout_BR11(daysAfterCheckout: -1)
+    EquipmentBorrowing.Tests.DomainTests.Borrowing_MarkAsReturned_StoresTheReturnDate_BR13
+    EquipmentBorrowing.Tests.DomainTests.Borrowing_CannotBeReturnedTwice
+    EquipmentBorrowing.Tests.DomainTests.Borrowing_CannotBeReturnedBeforeItWasCheckedOut
+    EquipmentBorrowing.Tests.ReturnTests.Return_ActiveBorrowing_KeepsTheRecordAndStoresTheActualReturnDate_BR13
+    EquipmentBorrowing.Tests.ReturnTests.Return_SameBorrowingTwice_SecondAttemptIsRejectedAndChangesNothing
+    EquipmentBorrowing.Tests.ReturnTests.Return_BorrowingThatDoesNotExist_IsRejected
+    EquipmentBorrowing.Tests.ReturnTests.Return_ByARestrictedStudent_IsStillAllowed_BR04
+    EquipmentBorrowing.Tests.ReturnTests.Return_WriteFails_RollsBackBothTheBorrowingAndTheEquipment
+    EquipmentBorrowing.Tests.ReturnTests.Return_ConnectionLostAfterCommit_ReportsUnknown_ButTheReturnIsSaved
+    EquipmentBorrowing.Tests.ReturnTests.Return_BorrowingCheckedOutAfterToday_IsRejected
+    EquipmentBorrowing.Tests.StudentEligibilityTests.Restrict_Student_ReturnsTheExactCleanMessage_F01
+    EquipmentBorrowing.Tests.StudentEligibilityTests.Restrict_Student_MessageContainsNoShellText_F01
+    EquipmentBorrowing.Tests.StudentEligibilityTests.Restrict_Student_KeepsExistingBorrowingsActive_BR04
+    EquipmentBorrowing.Tests.StudentEligibilityTests.Permit_RestrictedStudent_Works_AndRestrictingTwiceIsRejected
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07a_no_HTTP_response_is_reported_as_unreachable_with_no_value_and_no_retry(error: ConnectionRefused, isChange: False)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07a_no_HTTP_response_is_reported_as_unreachable_with_no_value_and_no_retry(error: ConnectionRefused, isChange: True)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07a_no_HTTP_response_is_reported_as_unreachable_with_no_value_and_no_retry(error: HostNotFound, isChange: False)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07a_no_HTTP_response_is_reported_as_unreachable_with_no_value_and_no_retry(error: HostNotFound, isChange: True)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07a_no_HTTP_response_is_reported_as_unreachable_with_no_value_and_no_retry(error: NetworkUnreachable, isChange: False)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07a_no_HTTP_response_is_reported_as_unreachable_with_no_value_and_no_retry(error: NetworkUnreachable, isChange: True)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.A_lost_connection_during_a_change_is_an_unknown_outcome_but_during_a_read_it_is_just_unreachable
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.A_timeout_during_a_change_is_an_unknown_outcome_but_during_a_read_it_is_unreachable
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07b_an_error_status_keeps_its_own_outcome_and_shows_the_servers_safe_message(status: 400, code: "validation_error", expected: ValidationError)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07b_an_error_status_keeps_its_own_outcome_and_shows_the_servers_safe_message(status: 404, code: "not_found", expected: NotFound)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07b_an_error_status_keeps_its_own_outcome_and_shows_the_servers_safe_message(status: 409, code: "conflict", expected: Conflict)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07b_an_error_status_keeps_its_own_outcome_and_shows_the_servers_safe_message(status: 500, code: "server_error", expected: ServerError)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07b_an_error_status_keeps_its_own_outcome_and_shows_the_servers_safe_message(status: 405, code: "method_not_allowed", expected: ServerError)
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07b_a_500_without_a_readable_body_still_becomes_a_safe_server_error_message
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientDoubleTests.E07c_outcome_unknown_from_the_server_is_an_unknown_outcome_and_is_never_retried_in_the_background
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientAgainstRealApiTests.E07a_real_transport_to_a_closed_port_gives_no_response_and_the_client_reports_unreachable
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientAgainstRealApiTests.E07b_a_reachable_API_with_an_unreachable_database_gives_the_client_a_server_error_not_unreachable
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_ClientAgainstRealApiTests.E07c_a_lost_commit_acknowledgement_makes_the_client_report_an_unknown_outcome_without_retrying_and_a_refresh_shows_the_truth
+    EquipmentBorrowing.Tests.Lab6.TC6_Architecture_DesktopBoundaryTests.The_desktop_project_references_only_Contracts_and_no_database_package
+    EquipmentBorrowing.Tests.Lab6.TC6_Architecture_DesktopBoundaryTests.No_desktop_source_file_uses_the_database_or_the_server_side_layers
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Registering_a_variant_of_an_existing_student_number_returns_409_and_changes_nothing(number: " st-100 ")
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Registering_a_variant_of_an_existing_student_number_returns_409_and_changes_nothing(number: "ST-100")
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Registering_a_variant_of_an_existing_student_number_returns_409_and_changes_nothing(number: "St-100")
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Registering_a_variant_of_an_existing_student_number_returns_409_and_changes_nothing(number: "  ST-100")
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Updating_another_student_to_a_variant_of_ST_100_returns_409_and_leaves_both_rows_unchanged
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.A_student_may_resubmit_their_own_number_in_a_different_case_and_spacing
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.A_padded_new_student_number_is_stored_normalized_and_then_blocks_its_own_case_variant
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Registering_a_variant_of_an_existing_equipment_code_returns_409_and_changes_nothing(code: " eq-001 ")
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Registering_a_variant_of_an_existing_equipment_code_returns_409_and_changes_nothing(code: "EQ-001")
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Registering_a_variant_of_an_existing_equipment_code_returns_409_and_changes_nothing(code: "Eq-001")
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Registering_a_variant_of_an_existing_equipment_code_returns_409_and_changes_nothing(code: "  EQ-001")
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.Updating_another_item_to_a_variant_of_EQ_001_returns_409_and_leaves_both_rows_unchanged
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.An_item_may_resubmit_its_own_code_in_a_different_case_and_spacing
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.A_padded_new_equipment_code_is_stored_normalized_and_then_blocks_its_own_case_variant
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.PostgreSQL_rejects_a_direct_duplicate_student_key_with_a_unique_violation
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_NormalizedUniquenessTests.PostgreSQL_rejects_a_direct_duplicate_equipment_key_with_a_unique_violation
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_DatabaseIntegrityTests.Expected_return_date_not_after_the_checkout_date_is_refused_by_a_CHECK_constraint
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_DatabaseIntegrityTests.A_return_date_before_the_checkout_date_is_refused_by_a_CHECK_constraint
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_DatabaseIntegrityTests.A_borrowing_for_a_student_or_item_that_does_not_exist_is_refused_by_a_foreign_key
+    EquipmentBorrowing.Tests.Lab6.TC6_E01_DatabaseIntegrityTests.A_student_or_item_that_has_borrowing_history_cannot_be_deleted
+    EquipmentBorrowing.Tests.Lab6.TC6_E02_LimitBoundaryTests.Subcase_a_S3_with_two_active_items_can_borrow_E2_as_the_third_single_item
+    EquipmentBorrowing.Tests.Lab6.TC6_E02_LimitBoundaryTests.Subcase_b_S1_with_one_active_item_can_check_out_E2_and_E6_together_to_reach_exactly_three
+    EquipmentBorrowing.Tests.Lab6.TC6_E02_LimitBoundaryTests.Subcase_c_S3_with_two_active_items_cannot_check_out_two_more_and_nothing_is_written
+    EquipmentBorrowing.Tests.Lab6.TC6_E02_LimitBoundaryTests.A_fourth_single_loan_is_rejected_after_the_third_was_accepted
+    EquipmentBorrowing.Tests.Lab6.TC6_E02_LimitBoundaryTests.A_student_with_no_loans_can_check_out_exactly_three_items_in_one_request
+    EquipmentBorrowing.Tests.Lab6.TC6_E02_LimitBoundaryTests.A_four_item_request_is_rejected_as_a_whole_with_no_partial_writes
+    EquipmentBorrowing.Tests.Lab6.TC6_E05_StaleAndConflictingStateTests.A_stale_single_request_for_E2_is_rejected_after_another_client_issued_it
+    EquipmentBorrowing.Tests.Lab6.TC6_E05_StaleAndConflictingStateTests.A_stale_multi_item_request_fails_as_a_whole_and_the_other_item_stays_available
+    EquipmentBorrowing.Tests.Lab6.TC6_E05_StaleAndConflictingStateTests.PostgreSQL_itself_refuses_a_second_active_row_for_the_same_item
+    EquipmentBorrowing.Tests.Lab6.TC6_E05_StaleAndConflictingStateTests.Two_simultaneous_requests_for_E2_produce_exactly_one_active_record(round: 1)
+    EquipmentBorrowing.Tests.Lab6.TC6_E05_StaleAndConflictingStateTests.Two_simultaneous_requests_for_E2_produce_exactly_one_active_record(round: 2)
+    EquipmentBorrowing.Tests.Lab6.TC6_E05_StaleAndConflictingStateTests.Two_simultaneous_requests_for_E2_produce_exactly_one_active_record(round: 3)
+    EquipmentBorrowing.Tests.Lab6.TC6_E05_StaleAndConflictingStateTests.Two_simultaneous_requests_for_E2_produce_exactly_one_active_record(round: 4)
+    EquipmentBorrowing.Tests.Lab6.TC6_E05_StaleAndConflictingStateTests.Two_simultaneous_requests_for_E2_produce_exactly_one_active_record(round: 5)
+    EquipmentBorrowing.Tests.Lab6.InfrastructureSmokeTests.Real_pipeline_returns_the_seven_seeded_items
+    EquipmentBorrowing.Tests.Lab6.InfrastructureSmokeTests.Fresh_connection_sees_the_S1_to_S4_E1_to_E7_fixture_relative_to_D
+    EquipmentBorrowing.Tests.Lab6.InfrastructureSmokeTests.Api_uses_the_fixed_date_D_and_a_write_is_visible_on_a_fresh_connection
+    EquipmentBorrowing.Tests.Lab6.InfrastructureSmokeTests.Isolation_A_creates_a_borrowing_and_still_sees_exactly_five
+    EquipmentBorrowing.Tests.Lab6.InfrastructureSmokeTests.Isolation_B_creates_a_borrowing_and_still_sees_exactly_five
+    EquipmentBorrowing.Tests.Lab6.TC6_OpenApi_ConsistencyTests.The_served_description_lists_exactly_the_sixteen_API_operations
+    EquipmentBorrowing.Tests.Lab6.TC6_OpenApi_ConsistencyTests.Documented_query_and_path_parameters_match_the_real_routes
+    EquipmentBorrowing.Tests.Lab6.TC6_OpenApi_ConsistencyTests.Documented_schemas_have_exactly_the_properties_of_the_contract_types
+    EquipmentBorrowing.Tests.Lab6.TC6_OpenApi_ConsistencyTests.Protected_fields_are_not_part_of_the_documented_update_requests
+    EquipmentBorrowing.Tests.Lab6.TC6_OpenApi_ConsistencyTests.Every_API_returns_its_documented_success_status_and_a_body_that_matches_the_documented_schema
+    EquipmentBorrowing.Tests.Lab6.TC6_OpenApi_ConsistencyTests.Every_error_status_the_API_really_returns_is_documented_for_that_operation_with_the_documented_error_shape
+    EquipmentBorrowing.Tests.Lab6.MA6_02_IndependentApiAndSynchronizationTests.The_API_runs_as_its_own_process_without_the_desktop_and_serves_a_consistent_OpenAPI_description
+    EquipmentBorrowing.Tests.Lab6.MA6_02_IndependentApiAndSynchronizationTests.One_persisted_change_made_through_one_client_is_seen_by_an_independent_second_client_and_by_PostgreSQL
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/students", body: "{bad json", expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "GET", url: "/api/v1/equipment?available=maybe", body: null, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":999999,\"equipmentId\":{E6},\"expec"┬╖┬╖┬╖, expectedStatus: 404, expectedCode: "not_found")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":{S4},\"equipmentId\":999999,\"expec"┬╖┬╖┬╖, expectedStatus: 404, expectedCode: "not_found")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/checkout-requests", body: "{\"studentId\":{S4},\"equipmentIds\":[{E2},999999]"┬╖┬╖┬╖, expectedStatus: 404, expectedCode: "not_found")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "GET", url: "/api/v1/borrowings/999999", body: null, expectedStatus: 404, expectedCode: "not_found")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings/999999/return", body: "{}", expectedStatus: 404, expectedCode: "not_found")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "GET", url: "/api/v1/no-such-route", body: null, expectedStatus: 404, expectedCode: "not_found")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "DELETE", url: "/api/v1/students/{S1}", body: null, expectedStatus: 405, expectedCode: "method_not_allowed")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "DELETE", url: "/api/v1/equipment/{E1}", body: null, expectedStatus: 405, expectedCode: "method_not_allowed")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "PUT", url: "/api/v1/borrowings", body: "{}", expectedStatus: 405, expectedCode: "method_not_allowed")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "DELETE", url: "/api/v1/borrowings/{BE1}", body: null, expectedStatus: 405, expectedCode: "method_not_allowed")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "GET", url: "/api/v1/checkout-requests", body: null, expectedStatus: 405, expectedCode: "method_not_allowed")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/equipment/{E1}/borrowings", body: "{}", expectedStatus: 405, expectedCode: "method_not_allowed")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":{S2},\"equipmentId\":{E6},\"expecte"┬╖┬╖┬╖, expectedStatus: 409, expectedCode: "conflict")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":{S4},\"equipmentId\":{E1},\"expecte"┬╖┬╖┬╖, expectedStatus: 409, expectedCode: "conflict")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/checkout-requests", body: "{\"studentId\":{S4},\"equipmentIds\":[{E1},{E2}],\"┬╖┬╖┬╖, expectedStatus: 409, expectedCode: "conflict")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings/{BE3}/return", body: "{}", expectedStatus: 409, expectedCode: "conflict")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "GET", url: "/api/v1/borrowings?direction=sideways", body: null, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/students", body: "{\"studentNumber\":\"ST-100\",\"fullName\":\"Dupli"┬╖┬╖┬╖, expectedStatus: 409, expectedCode: "conflict")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "GET", url: "/api/v1/borrowings?sort=bogus", body: null, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/checkout-requests", body: "{\"studentId\":{S4},\"equipmentIds\":\"x\",\"expec"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/students", body: "{\"studentNumber\":\"ST-700\",\"fullName\":\"X\",\"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/students", body: "{\"studentNumber\":\"ST-700\",\"fullName\":\"   \""┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/students", body: "{\"studentNumber\":\"   \",\"fullName\":\"Name\"}", expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/students", body: "{\"studentNumber\":123,\"fullName\":\"Name\"}", expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/equipment", body: "{bad json", expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/equipment", body: "{\"equipmentCode\":\"EQ-900\",\"name\":\"  \"}", expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/equipment", body: "{\"equipmentCode\":\"EQ-900\",\"name\":\"X\",\"isA"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":{S4},\"equipmentId\":{E6},\"expecte"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":{S4},\"equipmentId\":{E6},\"expecte"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":{S4},\"equipmentId\":{E6},\"expecte"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":\"abc\",\"equipmentId\":{E6},\"expe"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "{\"studentId\":{S4},\"equipmentId\":{E6}}", expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/borrowings", body: "", expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/checkout-requests", body: "{bad json", expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/checkout-requests", body: "{\"studentId\":{S4},\"equipmentIds\":[{E2},{E2}],\"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/checkout-requests", body: "{\"studentId\":{S4},\"equipmentIds\":[{E2}],\"expe"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/checkout-requests", body: "{\"studentId\":{S4},\"equipmentIds\":[{E2},{E6}],\"┬╖┬╖┬╖, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "GET", url: "/api/v1/borrowings?status=Bogus", body: null, expectedStatus: 400, expectedCode: "validation_error")
+    EquipmentBorrowing.Tests.Lab6.TC6_E03_ProtocolErrorTests.Request_gets_the_documented_status_a_safe_error_body_and_changes_nothing(method: "POST", url: "/api/v1/equipment", body: "{\"equipmentCode\":\"EQ-001\",\"name\":\"Another C"┬╖┬╖┬╖, expectedStatus: 409, expectedCode: "conflict")
+    EquipmentBorrowing.Tests.Lab6.TC6_E04_PostgresRollbackTests.Failure_after_the_first_item_write_returns_a_safe_500_and_leaves_E2_E6_and_all_rows_as_before
+    EquipmentBorrowing.Tests.Lab6.TC6_E06_OptionalAndProtectedFieldTests.Clearing_the_student_contact_returns_200_and_stores_NULL_without_touching_anything_else
+    EquipmentBorrowing.Tests.Lab6.TC6_E06_OptionalAndProtectedFieldTests.Blank_or_null_required_student_fields_are_rejected_with_400_and_the_row_is_unchanged
+    EquipmentBorrowing.Tests.Lab6.TC6_E06_OptionalAndProtectedFieldTests.A_duplicate_student_number_on_update_returns_409_and_both_rows_are_unchanged
+    EquipmentBorrowing.Tests.Lab6.TC6_E06_OptionalAndProtectedFieldTests.Eligibility_cannot_be_changed_through_the_student_update_and_the_student_stays_ineligible
+    EquipmentBorrowing.Tests.Lab6.TC6_E06_OptionalAndProtectedFieldTests.Clearing_the_equipment_description_returns_200_stores_NULL_and_keeps_availability_and_history
+    EquipmentBorrowing.Tests.Lab6.TC6_E06_OptionalAndProtectedFieldTests.Blank_required_equipment_fields_are_rejected_with_400_and_the_row_is_unchanged
+    EquipmentBorrowing.Tests.Lab6.TC6_E06_OptionalAndProtectedFieldTests.A_duplicate_equipment_code_on_update_returns_409_and_both_rows_are_unchanged
+    EquipmentBorrowing.Tests.Lab6.TC6_E06_OptionalAndProtectedFieldTests.Availability_cannot_be_changed_through_the_equipment_update_in_either_direction
+    EquipmentBorrowing.Tests.Lab6.TC6_U01_CatalogTests.Catalog_returns_exactly_seven_items_with_ids_names_and_availability
+    EquipmentBorrowing.Tests.Lab6.TC6_U01_CatalogTests.Empty_catalog_returns_200_and_an_empty_json_array
+    EquipmentBorrowing.Tests.Lab6.TC6_U02_AvailableFilteringTests.Available_true_returns_only_E2_E3_E6_E7_and_excludes_E1_E4_E5
+    EquipmentBorrowing.Tests.Lab6.TC6_U02_AvailableFilteringTests.Available_false_is_not_a_filter_and_returns_the_whole_catalog
+    EquipmentBorrowing.Tests.Lab6.TC6_U02_AvailableFilteringTests.Available_true_with_no_available_items_returns_200_and_an_empty_array
+    EquipmentBorrowing.Tests.Lab6.TC6_U04_ActiveBorrowingsTests.Active_status_returns_exactly_E1_E4_E5_with_correct_students_and_excludes_returned_E3
+    EquipmentBorrowing.Tests.Lab6.TC6_U07_StudentHistoryTests.S1_history_shows_active_E1_and_returned_E3_with_associations_dates_and_status
+    EquipmentBorrowing.Tests.Lab6.TC6_U07_StudentHistoryTests.S3_history_contains_only_S3_records_for_E4_and_E5
+    EquipmentBorrowing.Tests.Lab6.TC6_U07_StudentHistoryTests.Existing_student_without_borrowings_returns_200_and_an_empty_array
+    EquipmentBorrowing.Tests.Lab6.TC6_U07_StudentHistoryTests.Missing_student_returns_404_not_found_for_both_the_record_and_the_history
+    EquipmentBorrowing.Tests.Lab6.TC6_U08_EquipmentHistoryTests.E1_history_is_one_active_record_for_S1
+    EquipmentBorrowing.Tests.Lab6.TC6_U08_EquipmentHistoryTests.E3_history_is_one_returned_record_for_S1_with_its_return_date
+    EquipmentBorrowing.Tests.Lab6.TC6_U08_EquipmentHistoryTests.E4_history_belongs_to_S3_not_to_another_student_or_item
+    EquipmentBorrowing.Tests.Lab6.TC6_U08_EquipmentHistoryTests.Existing_item_without_borrowings_returns_200_and_an_empty_array
+    EquipmentBorrowing.Tests.Lab6.TC6_U08_EquipmentHistoryTests.Missing_item_returns_404_not_found_for_both_the_record_and_the_history
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "ada", expectedCodes: "EQ-001,EQ-003")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: " aDa ", expectedCodes: "EQ-001,EQ-003")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "CRUZ", expectedCodes: "EQ-001,EQ-003")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "lim", expectedCodes: "EQ-004,EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "st-100", expectedCodes: "EQ-001,EQ-003")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "ST-3", expectedCodes: "EQ-004,EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "eq-003", expectedCodes: "EQ-003")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "eq-00", expectedCodes: "EQ-001,EQ-003,EQ-004,EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "cam", expectedCodes: "EQ-001")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "PROJEC", expectedCodes: "EQ-003")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "tablet", expectedCodes: "EQ-004")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "phone", expectedCodes: "EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "zzzz", expectedCodes: "")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Search_matches_case_insensitive_partial_text_in_each_field(search: "laptop", expectedCodes: "")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Status_filter_returns_the_correct_set(status: "Active", expectedCodes: "EQ-001,EQ-004,EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Status_filter_returns_the_correct_set(status: "Returned", expectedCodes: "EQ-003")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Status_filter_returns_the_correct_set(status: "All", expectedCodes: "EQ-001,EQ-003,EQ-004,EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.No_criteria_returns_all_four_borrowings_and_a_search_does_not_stick_to_the_next_request
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Sort_orders_by_the_chosen_date_then_by_borrowing_id(sort: "borrowedDate", direction: "asc", expectedOrder: "EQ-001,EQ-003,EQ-004,EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Sort_orders_by_the_chosen_date_then_by_borrowing_id(sort: "borrowedDate", direction: "desc", expectedOrder: "EQ-005,EQ-004,EQ-003,EQ-001")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Sort_orders_by_the_chosen_date_then_by_borrowing_id(sort: "expectedReturnDate", direction: "asc", expectedOrder: "EQ-001,EQ-003,EQ-004,EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Sort_orders_by_the_chosen_date_then_by_borrowing_id(sort: "expectedReturnDate", direction: "desc", expectedOrder: "EQ-005,EQ-004,EQ-003,EQ-001")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Equal_date_ties_come_back_in_the_same_order_on_every_request
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Combined_search_status_and_sort_apply_together(query: "?search=cruz&status=Active&sort=borrowedDate&direc"┬╖┬╖┬╖, expectedOrder: "EQ-001")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Combined_search_status_and_sort_apply_together(query: "?search=cruz&status=Returned", expectedOrder: "EQ-003")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Combined_search_status_and_sort_apply_together(query: "?search=st-300&status=Active&sort=expectedReturnDa"┬╖┬╖┬╖, expectedOrder: "EQ-004,EQ-005")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Combined_search_status_and_sort_apply_together(query: "?search=st-300&status=Active&sort=expectedReturnDa"┬╖┬╖┬╖, expectedOrder: "EQ-005,EQ-004")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Combined_search_status_and_sort_apply_together(query: "?search=lim&status=Returned", expectedOrder: "")
+    EquipmentBorrowing.Tests.Lab6.TC6_U09_SearchAndOrderingTests.Searching_filtering_and_sorting_never_change_the_database
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_TransportAndUncertainOutcomeTests.E07b_A_reachable_API_whose_database_is_unreachable_returns_a_safe_500_and_writes_nothing
+    EquipmentBorrowing.Tests.Lab6.TC6_E07_TransportAndUncertainOutcomeTests.E07c_A_lost_commit_acknowledgement_is_reported_as_outcome_unknown_and_PostgreSQL_holds_all_or_none_state
+    EquipmentBorrowing.Tests.Lab6.TC6_E08_FreshConnectionsAndRestartTests.Part1_state_survives_disposed_hosts_and_is_read_back_through_fresh_connections_and_contexts
+    EquipmentBorrowing.Tests.Lab6.TC6_E08_FreshConnectionsAndRestartTests.Part2_harness_a_real_API_process_restart_keeps_created_and_returned_records
+    EquipmentBorrowing.Tests.Lab6.TC6_U03_SingleBorrowingTests.Issue_E2_to_S4_returns_201_with_location_and_persists_one_active_record_and_an_unavailable_item
+    EquipmentBorrowing.Tests.Lab6.TC6_U05_ReturnAndHistoryTests.Return_S1_E1_marks_it_Returned_dated_D_keeps_the_same_record_and_a_repeat_returns_409_unchanged
+    EquipmentBorrowing.Tests.Lab6.TC6_U06_MultiItemCheckoutTests.Checkout_E2_and_E6_for_S4_creates_two_active_records_and_makes_both_items_unavailable
+    EquipmentBorrowing.Tests.Lab6.TC6_U12_RegisterStudentTests.Register_ST_500_returns_201_with_id_location_and_eligible_default_and_persists_one_row
+    EquipmentBorrowing.Tests.Lab6.TC6_U13_UpdateStudentTests.Search_then_edit_S1_changes_name_and_contact_but_not_identity_or_borrowing_relationships
+    EquipmentBorrowing.Tests.Lab6.TC6_U14_EligibilityTransitionsTests.Restriction_blocks_a_new_loan_not_the_return_and_permitting_restores_issuing
+    EquipmentBorrowing.Tests.Lab6.TC6_U15_RegisterEquipmentTests.Register_EQ_008_returns_201_available_and_a_duplicate_EQ_001_is_rejected_with_409
+    EquipmentBorrowing.Tests.Lab6.TC6_U16_UpdateEquipmentTests.Editing_the_E1_description_keeps_its_identity_unavailable_state_and_active_history

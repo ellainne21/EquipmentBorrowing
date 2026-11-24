@@ -1096,6 +1096,104 @@ Each test has a request log (`docs/lab5/evidence/T0x-requests.txt`, written by t
 - The acceptance tests ran against the disposable test database only.
 - The error banner on the Students page can overlap the Retry button. This is cosmetic.
 
-### 13. Pair
+## Lab 6 — Automated verification and regression testing
+
+Lab 6 continues this repository (Lab 5 baseline: tag `lab5-submitted`, commit `dd1e826`; Lab 6 final: tag `lab6-submitted`).
+It adds automated xUnit verification of the Campus Equipment Borrowing system: UC-01–09 and UC-12–16 (all 14), API-01–16, edge cases and recovery,
+plus manual acceptance checks MA6-01 and MA6-02. The complete records are in `docs/lab6/Lab6_Test_Record.md` (baseline, traceability matrix,
+execution record, defects) and `docs/lab6/evidence/`.
+
+### What was added
+
+* Test code: `tests/EquipmentBorrowing.Tests/Lab6/` (inside the existing test project). The earlier Lab 4/5 rule tests (using fakes) are unchanged and still run.
+* One production change: `public partial class Program { }` at the end of `src/EquipmentBorrowing.Api/Program.cs` so the tests can start the real ASP.NET Core pipeline. No behavior change.
+* The existing Lab 4/5 test seams are used as they were (fixed clock, controlled dataset reset, `AfterFirstWrite`, `LostCommit`, `BrokenConnection`); they work only with the test database.
+
+### Requirements
+
+* .NET SDK 10 (the project targets `net10.0`).
+* A local PostgreSQL server. Docker and paid services are **not** needed.
+* An empty, **disposable test database whose name contains `test`**. The tests refuse to run against any other database name and never touch your real data.
+
+### One-time setup
+
+1. Create the test database (any name containing `test`), for example with pgAdmin or `psql`:
+   ```sql
+   CREATE DATABASE <your_database_name_with_test>;
+   ```
+2. Store the connection string for the test database in user-secrets (never in the repository), under the key `ConnectionStrings:Test`:
+   ```powershell
+   dotnet user-secrets set "ConnectionStrings:Test" "<your connection string for the test database>" --project src/EquipmentBorrowing.Api
+   ```
+   (The Lab 5 setup may already have this key. `dotnet user-secrets list --project src/EquipmentBorrowing.Api` shows the key names; do not paste the values anywhere.)
+3. Migrations are applied automatically by the controlled-dataset reset; nothing else needs to be created.
+
+### Run the tests
+
+```powershell
+dotnet build
+dotnet test                                         # everything: Lab 4/5 tests + Lab 6 tests
+dotnet test --filter "FullyQualifiedName~Lab6"      # Lab 6 only
+dotnet test --filter "FullyQualifiedName~TC6_U09"   # one scenario
+```
+
+Expected result of the final revision: **228 tests, 228 passed, 0 failed, 0 skipped** (55 earlier + 173 Lab 6). A full run takes about three minutes because several tests start extra API hosts and one starts real API processes.
+
+Save the evidence (check the files contain no passwords before committing):
+
+```powershell
+mkdir docs\lab6\evidence
+dotnet test --logger "console;verbosity=normal" 2>&1 | Tee-Object docs\lab6\evidence\lab6-test-output.txt
+dotnet test --list-tests 2>&1 | Tee-Object docs\lab6\evidence\lab6-test-list.txt
+dotnet test --logger "trx;LogFileName=lab6.trx" --results-directory docs\lab6\evidence
+```
+
+### Isolation and determinism
+
+* **Fixed date D = 2026-11-10** (`EQUIPMENT_BORROWING_FIXED_DATE`), the same date as the Lab 5 dataset: E1 borrowed D-9 and due D-1 (overdue), E3 borrowed D-8 and returned D-2, E4/E5 borrowed D-7 and due D+2.
+* **Fixture S1–S4 / E1–E7** is reloaded before **every** test (`ControlledDataset.Reset`, `TRUNCATE … RESTART IDENTITY`), so there is no execution-order dependency. IDs are looked up through the API, not hard-coded.
+* Lab 6 tests run in one non-parallel xUnit collection because they share the one test database.
+* **Persisted state is read through brand-new, non-pooled PostgreSQL connections** (and fresh EF Core contexts in E08), not through the API under test.
+* Genuine PostgreSQL only: no SQLite and no EF Core InMemory.
+
+### Test layout (`tests/EquipmentBorrowing.Tests/Lab6/`)
+
+| File | Contents |
+| --- | --- |
+| `Lab6Infrastructure.cs`, `Lab6Helpers.cs` | Settings (D, connection guard), real-API fixture, fresh-connection helper, per-test reset, JSON/HTTP helpers, whole-database snapshot |
+| `ReadOnlyUseCaseTests.cs` | TC6-U01, U02, U04, U07, U08, U09 |
+| `WriteUseCaseTests.cs` | TC6-U03, U05, U06, U12–U16 |
+| `ConstraintAndLimitTests.cs` | TC6-E01 (normalized uniqueness, constraints, foreign keys), E02 (limit boundaries), E05 (stale/conflicting, concurrent requests) |
+| `ProtocolRollbackAndFieldTests.cs` | TC6-E03 (protocol errors), E04 (PostgreSQL rollback), E06 (optional/protected fields) |
+| `UncertainOutcomeAndRestartTests.cs` | TC6-E07 server side (unreachable database, lost commit), E08 (fresh connections, real process restart harness) |
+| `ClientHandlingAndBoundaryTests.cs` | TC6-E07 client side against the real desktop `ApiClient`, desktop architecture boundary |
+| `OpenApiAndIndependenceTests.cs` | OpenAPI consistency, independent API process, cross-client consistency (MA6-02 automated parts) |
+| `InfrastructureSmokeTests.cs` | Harness self-checks (not TC6 scenarios) |
+
+### API restart verification (TC6-E08)
+
+**Method used: documented integration harness.** `ApiProcess` (in `UncertainOutcomeAndRestartTests.cs`) starts the built API as a separate operating-system process
+(`dotnet src/EquipmentBorrowing.Api/bin/<Configuration>/net10.0/EquipmentBorrowing.Api.dll`, test database, fixed date D, a free loopback port), creates and returns records,
+kills the process, confirms requests now fail, starts a **new** process (different PID, logged in the test output), and compares the retrieved records with a fresh PostgreSQL readback.
+Run `dotnet build` first so the API output exists. Windows may ask once to allow `dotnet` on the loopback interface.
+
+Supervised manual alternative, if the harness cannot run on a machine:
+1. `$env:EQUIPMENT_BORROWING_DB="Test"; $env:EQUIPMENT_BORROWING_FIXED_DATE="2026-11-10"; dotnet run --project src/EquipmentBorrowing.Api -- --reset-test-data`
+2. Start the API (`dotnet run --project src/EquipmentBorrowing.Api`), create a student, an item and a borrowing, then return it, saving the HTTP responses.
+3. Stop the API (Ctrl+C), confirm a request fails, start it again, and GET the same records; compare with a `psql` readback. Record the observations.
+
+### Manual acceptance (MA6-01, MA6-02)
+
+See `docs/lab6/Lab6_Test_Record.md` (rows MA6-01 and MA6-02) and the evidence files named `MA6-01_*` and `MA6-02_*` in `docs/lab6/evidence/`.
+
+### Limits of the evidence
+
+* HTTP test doubles simulate transport failures for the desktop client only; they cannot prove persistence or rollback. Those claims use the real API and PostgreSQL.
+* The server fault seams model a failure inside a transaction and a lost commit acknowledgement; they are not a real network drop or a process crash.
+* The four desktop API-client source files are compiled into the test project, so the real client code is tested; the Avalonia UI is not automated (manual checks cover it).
+* The simultaneous-request test (E05) was observed over five fresh rounds; a timing test cannot prove a race can never occur.
+* A green run does not by itself prove the application is correct; each scenario's assertions are listed in the test record.
+
+### Pair
 
 Ellainne G. Cabasag (2023304057) and Floramay S. Balofinos (2024302506).
