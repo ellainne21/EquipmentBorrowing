@@ -28,4 +28,12 @@
     <ProjectReference Include="..\..\src\EquipmentBorrowing.Infrastructure\EquipmentBorrowing.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Lab 6: compile the desktop API client source (no Avalonia needed) so E07 can test the real client class -->
+    <Compile Include="..\..\src\EquipmentBorrowing.Desktop\Api\*.cs" Link="Lab6\DesktopApi\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+
 </Project>
+
+
