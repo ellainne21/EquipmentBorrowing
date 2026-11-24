@@ -7,7 +7,7 @@ Authors: *<full names and student IDs of both partners, or your own>*
 All results below come from real runs of `dotnet test` against the disposable PostgreSQL test database with fixed date
 **D = 2026-11-10**. Latest full run: **228 tests, 228 passed, 0 failed, 0 skipped** (55 pre-existing Lab 4/5 tests + 173 Lab 6 tests),
 recorded in `docs/lab6/evidence/lab6-test-output.txt` and `lab6.trx`. No assertion is disabled or skipped.
-Items marked *<fill in>* are not yet known and must be completed from real data, not guessed.
+Every entry in this record comes from a real run, command output or commit. Where a published source was silent, the record says so instead of guessing.
 
 ---
 
