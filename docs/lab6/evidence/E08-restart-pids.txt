@@ -1,0 +1,7 @@
+﻿TC6-E08 Part 2: real API process restart (integration harness)
+Source: StdOut of test TC6_E08_FreshConnectionsAndRestartTests.Part2_harness_a_real_API_process_restart_keeps_created_and_returned_records
+Copied unchanged from docs/lab6/evidence/lab6.trx (run of the 228-test suite, 228 passed).
+
+Process 1: pid 21280, port 56501
+Process 1 stopped; requests to port 56501 now fail (no HTTP response).
+Process 2: pid 1192, port 56506
